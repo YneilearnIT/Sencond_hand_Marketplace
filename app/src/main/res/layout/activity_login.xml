@@ -1,89 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#FFFFFF">
+    tools:context=".LoginActivity">
 
-    <!-- Header xanh -->
-    <RelativeLayout
-        android:id="@+id/layoutHeaderLogin"
-        android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:background="#64B5F6"
-        android:padding="16dp">
-        <ImageView
-            android:id="@+id/imgLogoLogin"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:src="@drawable/logo" /> <!-- Thay bằng logo của bạn -->
-    </RelativeLayout>
-
-    <!-- Card Đăng nhập -->
-    <LinearLayout
-        android:id="@+id/cardLogin"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_margin="40dp"
-        android:background="#BBDEFB"
-        android:orientation="vertical"
-        android:padding="24dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Email/SDT"
-            android:textColor="#333333" />
-
-        <EditText
-            android:id="@+id/edtAccount"
-            android:layout_width="match_parent"
-            android:layout_height="45dp"
-            android:layout_marginTop="8dp"
-            android:background="#FFFFFF"
-            android:hint="Nhập Email hoặc SDT"
-            android:padding="10dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="Mật khẩu"
-            android:textColor="#333333" />
-
-        <EditText
-            android:id="@+id/edtPassword"
-            android:layout_width="match_parent"
-            android:layout_height="45dp"
-            android:layout_marginTop="8dp"
-            android:background="#FFFFFF"
-            android:hint="Nhập mật khẩu"
-            android:inputType="textPassword"
-            android:padding="10dp" />
-
-        <Button
-            android:id="@+id/btnLogin"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:backgroundTint="#333333"
-            android:text="Đăng nhập"
-            android:textColor="#FFFFFF" />
-
-        <TextView
-            android:id="@+id/btnForgotPassword"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="Quên mật khẩu"
-            android:textColor="#1976D2"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:padding="8dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:background="?attr/selectableItemBackgroundBorderless" />
-    </LinearLayout>
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
