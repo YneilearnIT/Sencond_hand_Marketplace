@@ -16,7 +16,7 @@
         <ImageView
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:src="@drawable/shm_logo" />
+            android:src="@drawable/logo" />
 
         <LinearLayout
             android:layout_width="0dp"
@@ -41,7 +41,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Đăng nhập/ Đăng ký"
+            android:text="Đăng ký"
             android:textColor="#FFFFFF"
             android:textSize="10sp" />
 
@@ -58,10 +58,15 @@
         android:padding="8dp">
 
         <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@android:drawable/ic_menu_sort_by_size" />
-
+            android:id="@+id/btnOpenMenu"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:padding="8dp"
+            android:src="@drawable/menu"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true"
+            app:tint="#333333" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -82,7 +87,7 @@
         <ImageView
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:src="@android:drawable/ic_menu_search" />
+            android:src="@drawable/cart" />
     </LinearLayout>
 
     <!-- Product List -->
@@ -152,7 +157,7 @@
             android:padding="8dp"
             android:scaleType="fitCenter"
             android:background="@drawable/bg_nav_button"
-            android:src="@android:drawable/ic_menu_home" />
+            android:src="@drawable/home" />
 
         <ImageButton
             android:id="@+id/btnNavUpload"
@@ -163,7 +168,7 @@
             android:padding="8dp"
             android:scaleType="fitCenter"
             android:background="@drawable/bg_nav_button"
-            android:src="@android:drawable/ic_menu_upload" />
+            android:src="@drawable/promotion" />
 
         <ImageButton
             android:id="@+id/btnNavAdd"
@@ -174,7 +179,7 @@
             android:padding="8dp"
             android:scaleType="fitCenter"
             android:background="@drawable/bg_nav_button"
-            android:src="@android:drawable/ic_input_add" />
+            android:src="@drawable/add" />
 
         <ImageButton
             android:id="@+id/btnNavProfile"
@@ -185,7 +190,7 @@
             android:padding="8dp"
             android:scaleType="fitCenter"
             android:background="@drawable/bg_nav_button"
-            android:src="@android:drawable/ic_menu_myplaces" />
+            android:src="@drawable/account" />
 
     </LinearLayout>
 </RelativeLayout>
