@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF">
+
+    <RelativeLayout
+        android:id="@+id/headerDetail"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:background="#64B5F6"
+        android:padding="16dp">
+        <ImageView
+            android:id="@+id/imgLogoDetail"
+            android:layout_width="50dp"
+            android:layout_height="match_parent"
+            android:src="@drawable/shm_logo" /> </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/searchSectionDetail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/headerDetail"
+        android:gravity="center_vertical"
+        android:padding="16dp">
+
+        <Button
+            android:id="@+id/btnFilter"
+            android:layout_width="wrap_content"
+            android:layout_height="35dp"
+            android:backgroundTint="#BBDEFB"
+            android:text="Bộ lọc"
+            android:textColor="#1976D2"
+            android:textAllCaps="false"
+            android:textSize="12sp" />
+
+        <EditText
+            android:id="@+id/edtSearchDetail"
+            android:layout_width="0dp"
+            android:layout_height="35dp"
+            android:layout_marginStart="12dp"
+            android:layout_weight="1"
+            android:background="#F0F8FF"
+            android:hint="Tìm kiếm sản phẩm"
+            android:paddingStart="12dp"
+            android:textSize="12sp"
+            android:inputType="text"/>
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/imgProductDetail"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_below="@id/searchSectionDetail"
+        android:layout_marginStart="24dp"
+        android:background="#E0E0E0"
+        android:src="@android:drawable/ic_menu_gallery" /> <Button
+    android:id="@+id/btnViewMoreImages"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/imgProductDetail"
+    android:layout_alignStart="@id/imgProductDetail"
+    android:layout_marginTop="12dp"
+    android:backgroundTint="#E0E0E0"
+    android:text="Xem Thêm Ảnh"
+    android:textColor="#333333"
+    android:textAllCaps="false"
+    android:textSize="12sp" />
+
+    <LinearLayout
+        android:id="@+id/infoSection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/imgProductDetail"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="16dp"
+        android:layout_toEndOf="@id/imgProductDetail"
+        android:background="#E0E0E0"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/txtProductInfoTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Thông tin sản phẩm:"
+            android:textColor="#333333"
+            android:textStyle="bold"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/txtProductRating"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Đánh giá: 5/5"
+            android:textColor="#333333" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/actionButtonsSection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="24dp"
+        android:layout_marginHorizontal="16dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnChatWithSeller"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            android:backgroundTint="#E0E0E0"
+            android:text="Chat"
+            android:textColor="#333333"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/btnAddToCart"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.3"
+            android:layout_marginHorizontal="8dp"
+            android:backgroundTint="#E0E0E0"
+            android:text="Thêm vào giỏ hàng"
+            android:textColor="#333333"
+            android:textAllCaps="false"
+            android:textSize="11sp" />
+
+        <Button
+            android:id="@+id/btnBuyNow"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:backgroundTint="#E0E0E0"
+            android:text="Mua ngay"
+            android:textColor="#333333"
+            android:textAllCaps="false" />
+    </LinearLayout>
+</RelativeLayout>
