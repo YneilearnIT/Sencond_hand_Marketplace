@@ -19,6 +19,24 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SencondhandMarketplace">
         <activity
+            android:name=".AdminApproveActivity"
+            android:exported="false" />
+        <activity
+            android:name=".PromotionDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".PromotionActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ReportActivity"
+            android:exported="false" />
+        <activity
+            android:name=".UserDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".InfoUserActivity"
+            android:exported="false" />
+        <activity
             android:name=".ProductDetailActivity"
             android:exported="false" />
         <activity
