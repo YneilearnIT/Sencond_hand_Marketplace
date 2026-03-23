@@ -1,46 +1,52 @@
 const express = require('express');
-const { engine } = require('express-handlebars');
 const path = require('path');
+const { engine } = require('express-handlebars');
+const cookieParser = require('cookie-parser');
+const apiRoutes = require('./src/routes/api');
 
 const app = express();
+const PORT = 3000;
 
-// Cấu hình Handlebars
-app.engine('hbs', engine({ extname: '.hbs', defaultLayout: 'main' }));
+// 1. Cấu hình View Engine (Handlebars)
+app.engine('hbs', engine({
+    extname: '.hbs',
+    defaultLayout: 'main',
+    layoutsDir: path.join(__dirname, 'views/layouts')
+}));
 app.set('view engine', 'hbs');
-app.set('views', './views');
+app.set('views', path.join(__dirname, 'views'));
 
-app.use(express.static('public'));
+// 2. Middleware (Xử lý dữ liệu đầu vào)
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public')));
 
-// Dữ liệu mẫu (Mock Data) dựa trên đặc tả 
-const categories = [
-    { id: 1, name: 'Điện thoại' }, { id: 2, name: 'Xe cộ' }, { id: 3, name: 'Đồ gia dụng' }
-];
+// 3. Kết nối API Routes (Backend)
+app.use('/api', apiRoutes);
 
-let listings = [
-    { id: 1, title: 'iPhone 13 Pro Max', price: '15.000.000', location: 'Quận 7, HCM', condition: 95, img: 'https://via.placeholder.com/150' },
-    { id: 2, title: 'Xe Honda Vision 2022', price: '28.500.000', location: 'Bình Thạnh, HCM', condition: 90, img: 'https://via.placeholder.com/150' }
-];
-
-// Routes
+// 4. Các Route hiển thị giao diện (Frontend)
 app.get('/', (req, res) => {
-    res.render('home', { title: 'Trang chủ - SHM', listings });
+    res.render('home');
 });
 
-app.get('/product/:id', (req, res) => {
-    const item = listings.find(l => l.id == req.params.id);
-    res.render('product', { item });
+app.get('/login', (req, res) => {
+    res.render('login');
+});
+
+app.get('/register', (req, res) => {
+    res.render('register');
 });
 
 app.get('/post-ad', (req, res) => {
-    res.render('post-ad', { categories });
+    res.render('post-ad');
 });
 
-app.post('/post-ad', (req, res) => {
-    // Xử lý lưu tin đăng [cite: 98]
-    const { title, price, categoryId, description } = req.body;
-    console.log("Đang kiểm duyệt tin:", title); // Business Rule: Chờ duyệt [cite: 185]
-    res.send('<h3>Tin đăng của bạn đang được kiểm duyệt! [cite: 238]</h3><a href="/">Về trang chủ</a>');
+app.get('/product/:id', (req, res) => {
+    res.render('product');
 });
 
-app.listen(3000, () => console.log('Server chạy tại http://localhost:3000'));
+// 5. Khởi động Server
+app.listen(PORT, () => {
+    console.log(`Server đang chạy tại: http://localhost:${PORT}`);
+});
