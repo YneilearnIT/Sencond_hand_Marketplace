@@ -28,7 +28,7 @@ class DashboardActivity : AppCompatActivity() {
         val btnNavAdd = findViewById<ImageButton>(R.id.btnNavAdd)
         btnNavAdd.setOnClickListener {
             // Chuyển sang trang Đăng tin (MainActivity)
-            val intent = Intent(this, MainActivity::class.java)
+            val intent = Intent(this, PostingActivity::class.java)
             startActivity(intent)
         }
         // ==========================================

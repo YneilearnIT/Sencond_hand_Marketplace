@@ -23,7 +23,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.io.ByteArrayOutputStream
 import java.util.ArrayList
 
-class MainActivity : AppCompatActivity() {
+class PostingActivity : AppCompatActivity() {
 
     private lateinit var btnAddImage: LinearLayout
     // Khai báo danh sách chứa 5 ô hình ảnh
@@ -183,9 +183,9 @@ class MainActivity : AppCompatActivity() {
                     } else {
                         // KHI HOÀN TẤT ĐẨY DỮ LIỆU SANG DASHBOARD
                         btnConfirm.isEnabled = true
-                        Toast.makeText(this@MainActivity, "Đăng tin thành công!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@PostingActivity, "Đăng tin thành công!", Toast.LENGTH_SHORT).show()
 
-                        val intent = Intent(this@MainActivity, DashboardActivity::class.java)
+                        val intent = Intent(this@PostingActivity, DashboardActivity::class.java)
                         intent.putExtra("TITLE", edtTitle.text.toString().trim())
                         intent.putExtra("PRICE", edtPrice.text.toString().trim() + " VNĐ")
                         intent.putExtra("ADDRESS", edtAddress.text.toString().trim())
@@ -200,7 +200,7 @@ class MainActivity : AppCompatActivity() {
 
             override fun onFailure(call: Call<ImgbbResponse>, t: Throwable) {
                 btnConfirm.isEnabled = true
-                Toast.makeText(this@MainActivity, "Lỗi tải ảnh: ${t.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@PostingActivity, "Lỗi tải ảnh: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
     }
