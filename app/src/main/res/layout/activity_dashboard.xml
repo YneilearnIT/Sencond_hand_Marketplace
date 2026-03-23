@@ -98,7 +98,9 @@
         android:layout_above="@+id/bottomNav"
         android:layout_below="@id/searchSection">
 
+
         <LinearLayout
+            android:id="@+id/layoutProductList"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
