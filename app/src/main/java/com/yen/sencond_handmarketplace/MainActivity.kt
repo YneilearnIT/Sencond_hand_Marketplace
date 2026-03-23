@@ -1,5 +1,6 @@
 package com.yen.sencond_handmarketplace
 
+import android.content.Intent // THÊM DÒNG NÀY ĐỂ DÙNG LỆNH CHUYỂN TRANG
 import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.Color
@@ -156,9 +157,28 @@ class MainActivity : AppCompatActivity() {
                 btnConfirm.isEnabled = true
                 if (response.isSuccessful && response.body() != null) {
                     val imageUrl = response.body()!!.data.url
-                    Toast.makeText(this@MainActivity, "Tin đăng đang được kiểm duyệt! (MSG01)", Toast.LENGTH_LONG).show()
-                    println("Link ảnh trả về: $imageUrl")
-                    println("Danh mục đã chọn: $selectedCategoryName")
+                    Toast.makeText(this@MainActivity, "Đăng tin thành công!", Toast.LENGTH_SHORT).show()
+
+                    // ==========================================
+                    // ĐOẠN CODE MỚI: CHUYỂN DỮ LIỆU SANG TRANG CHỦ
+                    // ==========================================
+                    val intent = Intent(this@MainActivity, DashboardActivity::class.java)
+
+                    // Lấy dữ liệu từ các ô nhập
+                    intent.putExtra("TITLE", edtTitle.text.toString().trim())
+                    intent.putExtra("PRICE", edtPrice.text.toString().trim() + " VNĐ")
+                    intent.putExtra("ADDRESS", edtAddress.text.toString().trim())
+                    intent.putExtra("DESC", edtDescription.text.toString().trim())
+
+                    // Đóng gói Link ảnh vào danh sách và gửi đi
+                    val imageList = ArrayList<String>()
+                    imageList.add(imageUrl)
+                    intent.putStringArrayListExtra("IMAGES", imageList)
+
+                    // Chuyển trang và Đóng màn hình đăng tin lại
+                    startActivity(intent)
+                    finish()
+                    // ==========================================
                 }
             }
 
