@@ -7,6 +7,10 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
+<<<<<<< HEAD
+=======
+
+>>>>>>> 7ec05b6a5ccc8b019cca11c35ccd913321cfd47f
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -16,6 +20,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SencondhandMarketplace">
 
+<<<<<<< HEAD
         <activity
             android:name=".PostingActivity"
             android:exported="true">
@@ -27,6 +32,19 @@
 
         <activity android:name=".DashboardActivity" android:exported="false" />
 
+=======
+        <activity android:name=".DashboardActivity" android:exported="false" />
+        <activity
+
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+>>>>>>> 7ec05b6a5ccc8b019cca11c35ccd913321cfd47f
     </application>
 
 </manifest>

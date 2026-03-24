@@ -22,17 +22,29 @@
             android:layout_centerVertical="true"
             android:layout_marginStart="4dp"
             android:background="?attr/selectableItemBackgroundBorderless"
+<<<<<<< HEAD
             android:src="@drawable/back"
+=======
+            android:src="@android:drawable/ic_menu_revert"
+>>>>>>> 7ec05b6a5ccc8b019cca11c35ccd913321cfd47f
             app:tint="#FFFFFF" />
 
         <TextView
             android:layout_width="wrap_content"
+<<<<<<< HEAD
             android:layout_height="match_parent"
             android:layout_centerInParent="true"
             android:gravity="center"
             android:text="Gói đẩy tin"
             android:textColor="#FFFFFF"
             android:textSize="20sp"
+=======
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="Gói đẩy tin"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+>>>>>>> 7ec05b6a5ccc8b019cca11c35ccd913321cfd47f
             android:textStyle="bold" />
     </RelativeLayout>
 
@@ -249,4 +261,8 @@
             android:src="@drawable/account" />
 
     </LinearLayout>
+<<<<<<< HEAD
 </LinearLayout>
+=======
+</LinearLayout>
+>>>>>>> 7ec05b6a5ccc8b019cca11c35ccd913321cfd47f

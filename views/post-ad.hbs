@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
@@ -58,4 +59,17 @@
             </div>
         </div>
     </div>
+=======
+<h2>Sản phẩm gần đây </h2>
+<div class="product-grid">
+    {{#each listings}}
+    <div class="product-card">
+        <img src="{{this.img}}" alt="product">
+        <h3><a href="/product/{{this.id}}">{{this.title}}</a></h3>
+        <p class="price">{{this.price}} đ</p>
+        <p class="loc">{{this.location}}</p>
+        <p>Độ mới: {{this.condition}}%</p>
+    </div>
+    {{/each}}
+>>>>>>> 7ec05b6a5ccc8b019cca11c35ccd913321cfd47f
 </div>
