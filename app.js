@@ -132,4 +132,4 @@ app.post('/post-ad', checkLogin, async (req, res) => {
     } catch (err) { res.send(`<script>alert('Lỗi khi đăng tin!'); window.history.back();</script>`); }
 });
 
-app.listen(PORT, () => console.log(`🚀 Hệ thống SHM của Linh đang chạy tại: http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Hệ thống SHM đang chạy tại: http://localhost:${PORT}`));
