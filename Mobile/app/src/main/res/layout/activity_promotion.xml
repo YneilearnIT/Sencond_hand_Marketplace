@@ -51,6 +51,7 @@
 
             <!-- GÓI 1: CƠ BẢN -->
             <androidx.cardview.widget.CardView
+                android:id="@+id/cardPromoBasic"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
@@ -121,6 +122,7 @@
 
             <!-- GÓI 2: VIP -->
             <androidx.cardview.widget.CardView
+                android:id="@+id/cardPromoVIP"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"

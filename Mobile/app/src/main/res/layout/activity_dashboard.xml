@@ -40,11 +40,15 @@
         </LinearLayout>
 
         <TextView
+            android:id="@+id/txtGoToRegister"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Đăng ký"
             android:textColor="#FFFFFF"
-            android:textSize="10sp" />
+            android:textSize="14sp"
+            android:padding="8dp"
+            android:clickable="true"
+            android:focusable="true" />
 
     </LinearLayout>
 

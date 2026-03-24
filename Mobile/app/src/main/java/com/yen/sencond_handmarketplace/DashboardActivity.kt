@@ -1,102 +1,85 @@
 package com.yen.sencond_handmarketplace
 
-import android.content.Intent // Import thêm Intent để chuyển trang
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.ViewGroup
-import android.widget.ImageButton // Import ImageButton cho Bottom Nav
-import android.widget.ImageView
+import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.ViewFlipper
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-//import com.bumptech.glide.Glide
 
 class DashboardActivity : AppCompatActivity() {
 
     private lateinit var layoutProductList: LinearLayout
+    private lateinit var txtUserStatus: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_dashboard)
 
+        // 1. ÁNH XẠ VIEW
+        txtUserStatus = findViewById(R.id.txtGoToRegister)
         layoutProductList = findViewById(R.id.layoutProductList)
-
-        // ==========================================
-        // 1. CHỨC NĂNG CHUYỂN TRANG (NÚT DẤU CỘNG)
-        // ==========================================
+        val btnNavHome = findViewById<ImageButton>(R.id.btnNavHome)
+        val btnNavPromo = findViewById<ImageButton>(R.id.btnNavUpload)
+        val btnProfile = findViewById<ImageButton>(R.id.btnNavProfile)
         val btnNavAdd = findViewById<ImageButton>(R.id.btnNavAdd)
-        btnNavAdd.setOnClickListener {
-            // Chuyển sang trang Đăng tin (MainActivity)
-            val intent = Intent(this, MainActivity::class.java)
+
+        // 2. XỬ LÝ NHẤN CHỮ "ĐĂNG KÝ" (Ở HEADER)
+        txtUserStatus.setOnClickListener {
+            val sharedPref = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+            val isLoggedIn = sharedPref.getBoolean("IS_LOGGED_IN", false)
+
+            if (!isLoggedIn) {
+                startActivity(Intent(this, RegisterActivity::class.java))
+            } else {
+                // Nếu đã đăng nhập, bấm vào tên có thể mở Profile luôn cho tiện
+                startActivity(Intent(this, InfoUserActivity::class.java))
+            }
+        }
+        // 1. NHẤN HÌNH NGÔI NHÀ (HOME)
+        btnNavHome.setOnClickListener {
+            val intent = Intent(this, DashboardActivity::class.java)
             startActivity(intent)
         }
-        // ==========================================
 
-        // 2. MỞ CỬA HỨNG DỮ LIỆU TỪ MÀN HÌNH ĐĂNG TIN GỬI SANG
-        val newTitle = intent.getStringExtra("TITLE")
-
-        if (newTitle != null) {
-            // Nếu có người vừa đăng tin, lấy toàn bộ dữ liệu ra
-            val newPrice = intent.getStringExtra("PRICE") ?: ""
-            val newAddress = intent.getStringExtra("ADDRESS") ?: ""
-            val newDesc = intent.getStringExtra("DESC") ?: ""
-            val newImages = intent.getStringArrayListExtra("IMAGES") ?: arrayListOf()
-
-            // GỌI HÀM NHÉT SẢN PHẨM MỚI LÊN ĐẦU TIÊN
-            addNewProductReal(newTitle, newPrice, newAddress, newDesc, newImages)
-        } else {
-            // Nếu chỉ mở app lên xem (không đăng tin), tôi tạo 1 cái tin mẫu cho bạn dễ nhìn
-            val mockImages = arrayListOf("https://i.ibb.co/30Z0Zcc/macbook.jpg") // Ảnh ví dụ
-            addNewProductReal("Macbook Pro M1 Mẫu", "18,000,000 VNĐ", "Quận 1, TP.HCM", "Đây là tin đăng mẫu", mockImages)
+        // 2. NHẤN HÌNH SỐ 2 (PROMOTION)
+        btnNavPromo.setOnClickListener {
+            // Chuyển sang màn hình PromotionActivity
+            val intent = Intent(this, PromotionActivity::class.java)
+            startActivity(intent)
         }
+
+        // 3. XỬ LÝ NHẤN ICON AVATAR (Ở BOTTOM NAV)
+        btnProfile.setOnClickListener {
+            val sharedPref = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+            val isLoggedIn = sharedPref.getBoolean("IS_LOGGED_IN", false)
+
+            if (isLoggedIn) {
+                // Nếu ĐÃ đăng nhập: Sang màn hình Info
+                startActivity(Intent(this, InfoUserActivity::class.java))
+            } else {
+                // Nếu CHƯA đăng nhập: Báo lỗi và bắt sang Login
+                Toast.makeText(this, "Vui lòng đăng nhập để xem thông tin!", Toast.LENGTH_SHORT).show()
+                startActivity(Intent(this, LoginActivity::class.java))
+            }
+        }
+
+
     }
 
-    // HÀM XỬ LÝ: Đổ dữ liệu thật và danh sách ảnh vào cái "Khuôn" (item_product.xml)
-    private fun addNewProductReal(title: String, price: String, address: String, description: String, imageUrls: List<String>) {
-        val productView = LayoutInflater.from(this).inflate(R.layout.item_product, layoutProductList, false)
+    // 5. CẬP NHẬT GIAO DIỆN MỖI KHI QUAY LẠI (TỪ LOGIN/INFO TRỞ VỀ)
+    override fun onResume() {
+        super.onResume()
+        val sharedPref = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+        val isLoggedIn = sharedPref.getBoolean("IS_LOGGED_IN", false)
+        val userName = sharedPref.getString("USER_NAME", "Đăng ký")
 
-        val tvTitle = productView.findViewById<TextView>(R.id.itemTvTitle)
-        val tvPrice = productView.findViewById<TextView>(R.id.itemTvPrice)
-        val tvAddress = productView.findViewById<TextView>(R.id.itemTvAddress)
-        val tvDesc = productView.findViewById<TextView>(R.id.itemTvDescription)
-        val viewFlipper = productView.findViewById<ViewFlipper>(R.id.itemViewFlipper)
-
-        // Đổ chữ vào
-        tvTitle.text = title
-        tvPrice.text = price
-        tvAddress.text = address
-        tvDesc.text = description
-
-        // Đổ danh sách ảnh vào ViewFlipper để làm Slide tự chạy
-        if (imageUrls.isNotEmpty()) {
-            for (url in imageUrls) {
-                val imageView = ImageView(this)
-                imageView.layoutParams = ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
-                )
-                imageView.scaleType = ImageView.ScaleType.CENTER_CROP
-
-                // Glide sẽ phụ trách việc tải ảnh từ đường link URL hiển thị lên màn hình
-                //Glide.with(this).load(url).into(imageView)
-
-                //viewFlipper.addView(imageView)
-            }
-
-            // Tắt hiệu ứng tự chạy nếu người dùng chỉ đăng 1 ảnh
-            if (imageUrls.size <= 1) {
-                viewFlipper.stopFlipping()
-            }
+        if (isLoggedIn) {
+            txtUserStatus.text = userName
         } else {
-            // Nếu không có ảnh nào, để tạm cái icon mặc định
-            val imageView = ImageView(this)
-            imageView.setImageResource(android.R.drawable.ic_menu_gallery)
-            viewFlipper.addView(imageView)
-            viewFlipper.stopFlipping()
+            txtUserStatus.text = "Đăng ký"
         }
-
-        // LỆNH QUAN TRỌNG NHẤT: Thêm sản phẩm này vào vị trí số 0 (Nhảy lên trên cùng)
-        layoutProductList.addView(productView, 0)
     }
 }
