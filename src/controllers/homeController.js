@@ -1,26 +1,26 @@
-const pool = require('../config/db');
+const { sql, poolPromise } = require('../config/db'); // Cập nhật cách import db
 
 const getHomeListings = async (req, res) => {
-    const { lat, lon } = req.query;
-    // Mặc định tọa độ HCM nếu người dùng không cung cấp GPS
-    const userLat = lat || 10.762622;
-    const userLon = lon || 106.660172;
+    // Lưu ý: Cột lưu vị trí hiện tại của bạn là location_gps (chuỗi ký tự nvarchar)
+    // Chức năng tính toán khoảng cách (khoảng cách Haversine) yêu cầu kiểu dữ liệu Float cho vĩ độ/kinh độ.
+    // Tạm thời mình sẽ trả về danh sách 20 tin mới nhất và ưu tiên tin VIP. 
+    // Nếu bạn muốn tính toán khoảng cách theo GPS thật, cần sửa bảng listings để tách riêng 2 cột Lat/Lon kiểu Float.
 
     try {
+        const pool = await poolPromise;
+        
+        // Dùng TOP thay vì LIMIT, dùng is_vip thay vì promotion_expiry_date
         const query = `
-            SELECT *,
-            (6371 * acos(cos(radians($1)) * cos(radians(latitude)) * cos(radians(longitude) - radians($2)) + sin(radians($1)) * sin(radians(latitude)))) AS distance
-            FROM Listings
+            SELECT TOP 20 *
+            FROM listings
             WHERE status = 'Active'
             ORDER BY 
-                CASE WHEN promotion_expiry_date > CURRENT_TIMESTAMP THEN 0 ELSE 1 END, -- Ưu tiên tin đẩy lên đầu
-                distance ASC, -- Ưu tiên khoảng cách gần nhất
+                is_vip DESC, -- Ưu tiên tin VIP (1) lên đầu
                 created_at DESC
-            LIMIT 20; -- Áp dụng phân trang để tối ưu hiệu suất
         `;
 
-        const result = await pool.query(query, [userLat, userLon]);
-        res.status(200).json(result.rows);
+        const result = await pool.request().query(query);
+        res.status(200).json(result.recordset); // Dùng recordset thay vì rows
     } catch (err) {
         console.error(err);
         res.status(500).send("Lỗi lấy danh sách sản phẩm");

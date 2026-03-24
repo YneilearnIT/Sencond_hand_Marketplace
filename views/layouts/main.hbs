@@ -3,54 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SHM Marketplace - Dự án của Linh</title>
+    <title>Sàn giao dịch SHM</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background-color: #f8f9fa; }
+        .navbar { box-shadow: 0 2px 4px rgba(0,0,0,.1); }
+    </style>
 </head>
-<body class="bg-light">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm sticky-top">
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top py-2">
         <div class="container">
             <a class="navbar-brand fw-bold fs-3" href="/">SHM</a>
-            
+            <a href="/post-ad" class="btn btn-light btn-sm ms-3 text-primary fw-bold rounded-pill px-3">
+                <i class="fas fa-plus-circle"></i> Đăng tin ngay
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link text-white" href="/post-ad"><i class="fas fa-plus-circle"></i> Đăng tin ngay</a>
+                <form class="d-flex mx-auto w-50 my-2 my-lg-0">
+                    <input class="form-control rounded-start-pill border-0 px-4" type="search" placeholder="Bạn muốn tìm mua gì hôm nay?">
+                    <button class="btn btn-warning rounded-end-pill px-4 fw-bold" type="submit"><i class="fas fa-search"></i></button>
+                </form>
+
+                <ul class="navbar-nav ms-auto align-items-center">
+                    
+                    <li class="nav-item me-4 mt-1">
+                        <a class="nav-link text-white position-relative" href="/cart" id="cart-icon-link">
+                            <i class="fas fa-shopping-cart fs-5"></i>
+                            {{#if cartItemCount}}
+                            <span id="cart-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65em;">
+                                {{cartItemCount}}
+                            </span>
+                            {{/if}}
+                        </a>
                     </li>
-                </ul>
-                
-                <div class="d-flex align-items-center gap-3">
+
                     {{#if user}}
-                        <div class="dropdown">
-                            <a class="btn btn-outline-light dropdown-toggle border-0" href="#" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-user-circle"></i> {{user.full_name}}
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end shadow border-0">
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-list"></i> Tin đã đăng</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item text-danger" href="/logout"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a></li>
-                            </ul>
-                        </div>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-white fw-medium" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle fs-5 align-middle me-1"></i> {{user.full_name}}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">
+                            <li><a class="dropdown-item" href="#">Trang cá nhân</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger fw-bold" href="/logout"><i class="fas fa-sign-out-alt me-2"></i> Đăng xuất</a></li>
+                        </ul>
+                    </li>
                     {{else}}
-                        <a href="/login" class="btn btn-outline-light px-4 rounded-pill">Đăng nhập</a>
-                        <a href="/register" class="btn btn-warning px-4 rounded-pill fw-bold">Đăng ký</a>
+                    <li class="nav-item"><a class="nav-link text-white fw-medium" href="/login">Đăng nhập</a></li>
+                    <li class="nav-item"><a class="btn btn-outline-light btn-sm ms-2 rounded-pill px-3" href="/register">Đăng ký</a></li>
                     {{/if}}
-                </div>
+                </ul>
             </div>
         </div>
     </nav>
 
-    <main class="container py-4">
+    <main class="container my-4">
         {{{body}}}
     </main>
 
-    <footer class="bg-white py-4 mt-5 border-top">
-        <div class="container text-center text-muted small">
-            <p class="mb-1">© 2026 Sàn giao dịch C2C SHM</p>
-          
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1055">
+        <div id="cartToast" class="toast align-items-center text-bg-success border-0 shadow" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body fw-bold">
+                    <i class="fas fa-check-circle me-2"></i> Đã thêm vào giỏ hàng thành công!
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
         </div>
-    </footer>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        document.querySelectorAll('form[action="/cart/add"]').forEach(form => {
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault(); // Phép thuật nằm ở đây: Chặn không cho web tải lại
+                
+                const formData = new FormData(form);
+                const listing_id = formData.get('listing_id');
+
+                try {
+                    // Gửi dữ liệu ngầm lên Backend
+                    const response = await fetch('/cart/add', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ listing_id })
+                    });
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // 1. Cập nhật con số màu đỏ trên Icon Giỏ hàng
+                        const badge = document.getElementById('cart-badge');
+                        if (badge) {
+                            badge.innerText = data.cartCount;
+                        } else {
+                            // Nếu trước đó giỏ trống chưa có cục đỏ, thì tự tạo ra
+                            const cartIcon = document.getElementById('cart-icon-link');
+                            cartIcon.innerHTML += `<span id="cart-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65em;">${data.cartCount}</span>`;
+                        }
+                        
+                        // 2. Bắn cái Popup xanh xanh "Đã thêm thành công" lên
+                        const toast = new bootstrap.Toast(document.getElementById('cartToast'));
+                        toast.show();
+                    }
+                } catch (err) {
+                    console.error('Lỗi:', err);
+                }
+            });
+        });
+    </script>
 </body>
 </html>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
