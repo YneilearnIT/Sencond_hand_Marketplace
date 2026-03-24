@@ -1,0 +1,13 @@
+# Bỏ qua thư viện Node.js
+**/node_modules/
+
+# Bỏ qua file rác Android/Java
+**/.gradle/
+**/build/
+**/local.properties
+**/.idea/
+**/*.iml
+
+# File hệ thống
+.DS_Store
+Thumbs.db

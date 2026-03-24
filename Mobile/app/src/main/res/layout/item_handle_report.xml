@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="10dp"
+    app:cardElevation="3dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp">
+
+        <TextView
+            android:id="@+id/txtReportTarget"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Báo cáo: [Tên sản phẩm/Người dùng]"
+            android:textColor="#D32F2F"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/txtReportReason"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:background="#FFF3E0"
+            android:padding="8dp"
+            android:text="Lý do: Lừa đảo, thông tin sai sự thật..."
+            android:textColor="#333333"
+            android:textSize="13sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:layout_marginTop="10dp">
+
+            <Button
+                android:id="@+id/btnIgnoreReport"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bỏ qua"
+                android:textColor="#757575" />
+
+            <Button
+                android:id="@+id/btnDeletePost"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="#D32F2F"
+                android:text="Gỡ bài"
+                android:textColor="#FFFFFF" />
+        </LinearLayout>
+    </LinearLayout>
+</androidx.cardview.widget.CardView>
