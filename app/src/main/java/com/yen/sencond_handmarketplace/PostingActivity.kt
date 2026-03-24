@@ -20,6 +20,8 @@ import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.http.Body
+import retrofit2.http.POST
 import java.io.ByteArrayOutputStream
 import java.util.ArrayList
 
@@ -42,18 +44,18 @@ class PostingActivity : AppCompatActivity() {
     private lateinit var btnCate4: Button
 
     private var selectedCategoryName: String = ""
-    private val imgbbApiKey = "7dbf488230ca76945d9bff93c50fad28"
+    private val imgbbApiKey = "7dbf488230ca76945d9bff93c50fad28" // Key API ImgBB của bạn
 
     private val selectedBitmaps = mutableListOf<Bitmap>()
     private val uploadedUrls = ArrayList<String>()
     private var currentUploadIndex = 0
 
-    // CHỌN NHIỀU ẢNH VÀ HIỂN THỊ LÊN TỪNG Ô
+    // CHỌN NHIỀU ẢNH VÀ HIỂN THỊ LÊN TỪNG Ô (TỐI ĐA 5 ẢNH)
     private val pickMultipleImagesLauncher = registerForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris: List<Uri> ->
         if (uris.isNotEmpty()) {
             selectedBitmaps.clear()
 
-            // Chỉ lấy tối đa 5 ảnh dù người dùng có chọn nhiều hơn
+            // Giới hạn lấy tối đa 5 ảnh
             val takeCount = minOf(uris.size, 5)
 
             for (i in 0 until takeCount) {
@@ -67,13 +69,13 @@ class PostingActivity : AppCompatActivity() {
                 selectedBitmaps.add(bitmap)
             }
 
-            // Đổ hình ảnh vào các ô UI tương ứng
+            // Đổ hình ảnh vào các ô giao diện
             for (i in imageViews.indices) {
                 if (i < selectedBitmaps.size) {
                     imageViews[i].setImageBitmap(selectedBitmaps[i])
                     imageViews[i].visibility = View.VISIBLE
                 } else {
-                    imageViews[i].visibility = View.GONE // Ẩn ô dư thừa
+                    imageViews[i].visibility = View.GONE
                 }
             }
 
@@ -134,7 +136,7 @@ class PostingActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // Bắt đầu upload chuỗi ảnh
+            // Bắt đầu quá trình Upload ảnh lên mây
             startUploadingProcess()
         }
     }
@@ -158,6 +160,7 @@ class PostingActivity : AppCompatActivity() {
         uploadSingleImageToImgbb(selectedBitmaps[currentUploadIndex])
     }
 
+    // HÀM ĐỆ QUY TẢI ẢNH LÊN IMGBB
     private fun uploadSingleImageToImgbb(bitmap: Bitmap) {
         val baos = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
@@ -179,21 +182,12 @@ class PostingActivity : AppCompatActivity() {
                     currentUploadIndex++
 
                     if (currentUploadIndex < selectedBitmaps.size) {
+                        // Tải tiếp ảnh tiếp theo
                         uploadSingleImageToImgbb(selectedBitmaps[currentUploadIndex])
                     } else {
-                        // KHI HOÀN TẤT ĐẨY DỮ LIỆU SANG DASHBOARD
-                        btnConfirm.isEnabled = true
-                        Toast.makeText(this@PostingActivity, "Đăng tin thành công!", Toast.LENGTH_SHORT).show()
-
-                        val intent = Intent(this@PostingActivity, DashboardActivity::class.java)
-                        intent.putExtra("TITLE", edtTitle.text.toString().trim())
-                        intent.putExtra("PRICE", edtPrice.text.toString().trim() + " VNĐ")
-                        intent.putExtra("ADDRESS", edtAddress.text.toString().trim())
-                        intent.putExtra("DESC", edtDescription.text.toString().trim())
-                        intent.putStringArrayListExtra("IMAGES", uploadedUrls)
-
-                        startActivity(intent)
-                        finish()
+                        // TẢI ẢNH XONG HẾT -> LƯU VÀO SQL SERVER
+                        Toast.makeText(this@PostingActivity, "Đang lưu dữ liệu vào Database...", Toast.LENGTH_SHORT).show()
+                        saveDataToYourSQLServer()
                     }
                 }
             }
@@ -203,5 +197,68 @@ class PostingActivity : AppCompatActivity() {
                 Toast.makeText(this@PostingActivity, "Lỗi tải ảnh: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
+    }
+
+    // HÀM LƯU DỮ LIỆU VÀO SQL SERVER (BACKEND)
+    private fun saveDataToYourSQLServer() {
+        val productData = ProductRequest(
+            title = edtTitle.text.toString().trim(),
+            price = edtPrice.text.toString().trim(),
+            address = edtAddress.text.toString().trim(),
+            description = edtDescription.text.toString().trim(),
+            category = selectedCategoryName,
+            images = uploadedUrls
+        )
+
+        // CHÚ Ý: Đổi IP này thành IP Backend thật của bạn (VD: IP của máy tính chạy Node.js)
+        val retrofit = Retrofit.Builder()
+            .baseUrl("http://10.0.2.2:3000/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        val api = retrofit.create(MyBackendApi::class.java)
+
+        api.createNewProduct(productData).enqueue(object : Callback<ApiResponse> {
+            override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
+                btnConfirm.isEnabled = true
+                if (response.isSuccessful && response.body()?.success == true) {
+                    Toast.makeText(this@PostingActivity, "Đăng tin thành công!", Toast.LENGTH_SHORT).show()
+
+                    // LƯU THÀNH CÔNG -> BAY SANG TRANG CHỦ
+                    val intent = Intent(this@PostingActivity, DashboardActivity::class.java)
+                    // (Bạn có thể bỏ gửi Intent Extra ở đây nếu DashboardActivity tự động load lại dữ liệu từ SQL)
+                    intent.putExtra("TITLE", edtTitle.text.toString().trim())
+                    intent.putExtra("PRICE", edtPrice.text.toString().trim() + " VNĐ")
+                    intent.putExtra("ADDRESS", edtAddress.text.toString().trim())
+                    intent.putExtra("DESC", edtDescription.text.toString().trim())
+                    intent.putStringArrayListExtra("IMAGES", uploadedUrls)
+
+                    startActivity(intent)
+                    finish()
+                } else {
+                    // Cấp cứu: Nếu Server lỗi, vẫn cho phép sang trang chủ (Để test UI)
+                    // *Xóa phần này đi khi code Backend của bạn đã hoàn chỉnh
+                    fallbackToDashboard()
+                }
+            }
+
+            override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
+                btnConfirm.isEnabled = true
+                Toast.makeText(this@PostingActivity, "Không kết nối được SQL. Chuyển sang chế độ Offline.", Toast.LENGTH_SHORT).show()
+                fallbackToDashboard() // Cấp cứu: Lỗi mạng vẫn cho test UI
+            }
+        })
+    }
+
+    // Hàm cấp cứu: Dùng để test giao diện khi Backend chưa chạy
+    private fun fallbackToDashboard() {
+        val intent = Intent(this@PostingActivity, DashboardActivity::class.java)
+        intent.putExtra("TITLE", edtTitle.text.toString().trim())
+        intent.putExtra("PRICE", edtPrice.text.toString().trim() + " VNĐ")
+        intent.putExtra("ADDRESS", edtAddress.text.toString().trim())
+        intent.putExtra("DESC", edtDescription.text.toString().trim())
+        intent.putStringArrayListExtra("IMAGES", uploadedUrls)
+        startActivity(intent)
+        finish()
     }
 }
