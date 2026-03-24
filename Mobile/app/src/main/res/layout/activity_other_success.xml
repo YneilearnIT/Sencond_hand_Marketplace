@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="30dp"
+    android:background="#FFFFFF">
+
+    <ImageView
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:src="@android:drawable/checkbox_on_background" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Đặt hàng thành công!"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="#333333"
+        android:layout_marginTop="20dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Cảm ơn bạn đã tin tưởng mua sắm.\nĐơn hàng của bạn đang được xử lý."
+        android:gravity="center"
+        android:textSize="16sp"
+        android:textColor="#757575"
+        android:layout_marginTop="12dp"/>
+
+    <Button
+        android:id="@+id/btnBackToHome"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:layout_marginTop="50dp"
+        android:text="QUAY VỀ TRANG CHỦ"
+        android:backgroundTint="#FF5722"
+        android:textColor="#FFFFFF"
+        app:cornerRadius="10dp"/>
+
+    <TextView
+        android:id="@+id/tvViewOrder"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="Xem chi tiết đơn hàng"
+        android:textColor="#1976D2"
+        android:textSize="14sp"
+        android:padding="10dp"/>
+</LinearLayout>

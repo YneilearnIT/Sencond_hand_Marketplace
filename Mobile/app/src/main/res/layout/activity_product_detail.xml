@@ -5,29 +5,26 @@
     android:layout_height="match_parent"
     android:background="#FFFFFF">
 
-    <!-- 1. Thanh Header trên cùng -->
     <LinearLayout
         android:id="@+id/headerDetail"
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:background="#FFFFFF"
+        android:elevation="2dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingHorizontal="8dp">
 
-        <!-- Nút Back -->
         <ImageButton
             android:id="@+id/btnBack"
             android:layout_width="42dp"
             android:layout_height="42dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Back"
             android:padding="10dp"
             android:scaleType="fitCenter"
             android:src="@drawable/back"
-            app:tint="#FFFFFF" />
+            app:tint="#333333" />
 
-        <!-- Thanh tìm kiếm -->
         <EditText
             android:id="@+id/edtSearchDetail"
             android:layout_width="0dp"
@@ -36,11 +33,10 @@
             android:layout_weight="1"
             android:background="@drawable/bg_search_input"
             android:hint="Tìm sản phẩm..."
+            android:inputType="text"
             android:paddingStart="12dp"
-            android:textSize="13sp"
-            android:inputType="text" />
+            android:textSize="13sp" />
 
-        <!-- Nút Chia sẻ -->
         <ImageButton
             android:id="@+id/btnShare"
             android:layout_width="42dp"
@@ -49,21 +45,41 @@
             android:padding="10dp"
             android:scaleType="fitCenter"
             android:src="@android:drawable/ic_menu_share"
-            app:tint="#FFFFFF" />
+            app:tint="#333333" />
 
-        <!-- Nút Giỏ hàng -->
-        <ImageButton
-            android:id="@+id/btnCartDetail"
-            android:layout_width="42dp"
-            android:layout_height="42dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:padding="10dp"
-            android:scaleType="fitCenter"
-            android:src="@drawable/cart"
-            app:tint="#FFFFFF" />
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="4dp">
+
+            <ImageButton
+                android:id="@+id/btnCartDetail"
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="10dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/cart"
+                app:tint="#333333" />
+
+            <TextView
+                android:id="@+id/txtCartBadge"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:layout_gravity="top|end"
+                android:layout_marginTop="2dp"
+                android:layout_marginEnd="2dp"
+                android:background="@android:drawable/ic_notification_overlay"
+                android:backgroundTint="#FF0000"
+                android:gravity="center"
+                android:text="0"
+                android:textColor="#FFFFFF"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+        </FrameLayout>
     </LinearLayout>
 
-    <!-- 2. Nội dung thông tin sản phẩm (Cuộn được) -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -76,16 +92,14 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Ảnh sản phẩm lớn -->
             <ImageView
                 android:id="@+id/imgProductLarge"
                 android:layout_width="match_parent"
                 android:layout_height="300dp"
-                android:scaleType="centerCrop"
                 android:background="#F5F5F5"
+                android:scaleType="centerCrop"
                 android:src="@android:drawable/ic_menu_gallery" />
 
-            <!-- Giá sản phẩm -->
             <TextView
                 android:id="@+id/txtPriceDetail"
                 android:layout_width="wrap_content"
@@ -96,7 +110,6 @@
                 android:textSize="22sp"
                 android:textStyle="bold" />
 
-            <!-- Tên sản phẩm -->
             <TextView
                 android:id="@+id/txtNameDetail"
                 android:layout_width="match_parent"
@@ -107,7 +120,6 @@
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
-            <!-- Tình trạng sản phẩm -->
             <TextView
                 android:id="@+id/txtStatusDetail"
                 android:layout_width="wrap_content"
@@ -126,12 +138,12 @@
                 android:layout_marginVertical="16dp"
                 android:background="#EEEEEE" />
 
-            <!-- Địa chỉ -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Địa chỉ người bán:"
                 android:textStyle="bold" />
+
             <TextView
                 android:id="@+id/txtAddressDetail"
                 android:layout_width="match_parent"
@@ -139,28 +151,25 @@
                 android:text="Quận 1, TP. Hồ Chí Minh"
                 android:textColor="#757575" />
 
-            <!-- Mô tả sản phẩm -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:text="Mô tả chi tiết:"
                 android:textStyle="bold" />
+
             <TextView
                 android:id="@+id/txtDescDetail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:lineSpacingExtra="4dp"
-                android:text="Đây là phần mô tả sản phẩm. Bạn có thể viết dài tùy ý ở đây, người dùng có thể cuộn xuống để đọc hết thông tin về món đồ bạn đang bán."
+                android:text="Đây là phần mô tả sản phẩm chi tiết..."
                 android:textColor="#333333" />
-
-
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Thanh nút bấm dưới cùng (Bottom Actions) gom thành 1 hàng -->
     <LinearLayout
         android:id="@+id/bottomActions"
         android:layout_width="match_parent"
@@ -168,80 +177,84 @@
         android:layout_alignParentBottom="true"
         android:background="#FFFFFF"
         android:elevation="10dp"
+        android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:padding="4dp"
-        android:gravity="center_vertical">
+        android:padding="4dp">
 
-        <!-- 1. Nút Báo cáo vi phạm (Dạng Icon + Chữ nhỏ) -->
         <LinearLayout
             android:id="@+id/btnReport"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="0.7"
-            android:gravity="center"
-            android:orientation="vertical"
             android:background="?attr/selectableItemBackground"
             android:clickable="true"
-            android:focusable="true">
+            android:focusable="true"
+            android:gravity="center"
+            android:orientation="vertical">
+
             <ImageView
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:src="@drawable/info"
-                app:tint="#000000" />
+                app:tint="#333333" />
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Báo cáo"
-                android:textColor="#1D1B1B"
+                android:textColor="#333333"
                 android:textSize="9sp" />
         </LinearLayout>
 
-        <!-- 2. Nút Chat -->
         <LinearLayout
             android:id="@+id/btnBottomChat"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="0.7"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
             android:gravity="center"
-            android:orientation="vertical"
-            android:background="?attr/selectableItemBackground">
+            android:orientation="vertical">
+
             <ImageView
                 android:layout_width="20dp"
                 android:layout_height="20dp"
-                android:src="@drawable/chat" />
+                android:src="@drawable/chat"
+                app:tint="#333333" />
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Chat"
+                android:textColor="#333333"
                 android:textSize="10sp" />
         </LinearLayout>
 
-        <!-- Nút Thêm giỏ hàng (Chuyển sang ImageButton để hiện hình) -->
         <ImageButton
             android:id="@+id/btnBottomAddToCart"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"
             android:layout_marginHorizontal="2dp"
-            android:backgroundTint="#FBFAF4"
-            android:src="@drawable/cart"
-            android:scaleType="centerInside"
+            android:layout_weight="1"
+            android:backgroundTint="#F0F0F0"
+            android:contentDescription="Thêm giỏ hàng"
             android:padding="12dp"
-            android:contentDescription="Thêm vào giỏ hàng"
+            android:scaleType="centerInside"
+            android:src="@drawable/cart"
             app:tint="#333333" />
 
-        <!-- 4. Nút Mua ngay -->
         <Button
             android:id="@+id/btnBottomBuyNow"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"
+            android:layout_weight="1.2"
             android:backgroundTint="#FF4444"
             android:text="Mua ngay"
             android:textAllCaps="false"
             android:textColor="#FFFFFF"
-            android:textSize="11sp"
-            android:paddingHorizontal="2dp" />
+            android:textSize="12sp" />
 
     </LinearLayout>
+
 </RelativeLayout>

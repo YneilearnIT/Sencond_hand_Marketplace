@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="8dp"
+    app:cardBackgroundColor="#FFFFFF"
+    android:layout_margin="5dp">
+
+    <LinearLayout
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="10dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Danh mục sản phẩm:"
+            android:textColor="#333333"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:paddingBottom="10dp"/>
+
+        <androidx.gridlayout.widget.GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:columnCount="2"
+            app:alignmentMode="alignMargins">
+
+            <TextView
+                android:id="@+id/tvCatQuanAo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_columnWeight="1"
+                android:layout_margin="4dp"
+                android:background="@drawable/bg_category_item"
+                android:gravity="center"
+                android:padding="10dp"
+                android:text="Quần áo"
+                android:textColor="#333333"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/tvCatGiayDep"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_columnWeight="1"
+                android:layout_margin="4dp"
+                android:background="@drawable/bg_category_item"
+                android:gravity="center"
+                android:padding="10dp"
+                android:text="Giày dép"
+                android:textColor="#333333"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/tvCatDienTu"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_columnWeight="1"
+                android:layout_margin="4dp"
+                android:background="@drawable/bg_category_item"
+                android:gravity="center"
+                android:padding="10dp"
+                android:text="Điện tử"
+                android:textColor="#333333"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/tvCatGiaDung"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_columnWeight="1"
+                android:layout_margin="4dp"
+                android:background="@drawable/bg_category_item"
+                android:gravity="center"
+                android:padding="10dp"
+                android:text="Đồ gia dụng"
+                android:textColor="#333333"
+                android:textSize="12sp" />
+
+        </androidx.gridlayout.widget.GridLayout>
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

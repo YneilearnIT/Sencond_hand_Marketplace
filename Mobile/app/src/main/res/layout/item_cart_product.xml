@@ -5,7 +5,15 @@
     android:background="#D3D3D3"
     android:padding="12dp"
     android:layout_marginBottom="8dp"
+    android:gravity="center_vertical"
     android:orientation="horizontal">
+
+    <RadioButton
+        android:id="@+id/rbSelectItem"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:buttonTint="#1976D2" />
 
     <ViewFlipper
         android:id="@+id/itemViewFlipper"
@@ -32,7 +40,9 @@
             android:paddingStart="8dp"
             android:layout_marginBottom="4dp"
             android:textStyle="bold"
-            android:textSize="14sp"/>
+            android:textSize="13sp"
+            android:maxLines="1"
+            android:ellipsize="end"/>
 
         <TextView
             android:id="@+id/itemTvPrice"
@@ -44,20 +54,7 @@
             android:paddingStart="8dp"
             android:layout_marginBottom="4dp"
             android:textColor="#D32F2F"
-            android:textSize="14sp"/>
-
-        <TextView
-            android:id="@+id/txtProductCondition"
-            android:layout_width="match_parent"
-            android:layout_height="30dp"
-            android:background="#E8F5E9"
-            android:text="Độ mới: "
-            android:gravity="center_vertical"
-            android:paddingStart="8dp"
-            android:layout_marginBottom="4dp"
-            android:textColor="#2E7D32"
-            android:textSize="13sp"
-            android:textStyle="italic"/>
+            android:textSize="13sp"/>
 
         <TextView
             android:id="@+id/itemTvAddress"
@@ -68,7 +65,7 @@
             android:gravity="center_vertical"
             android:paddingStart="8dp"
             android:layout_marginBottom="4dp"
-            android:textSize="13sp"/>
+            android:textSize="12sp"/>
 
         <TextView
             android:id="@+id/itemTvDescription"
@@ -78,6 +75,8 @@
             android:text="Mô tả sản phẩm"
             android:gravity="center_vertical"
             android:paddingStart="8dp"
-            android:textSize="13sp"/>
+            android:textSize="12sp"
+            android:maxLines="1"
+            android:ellipsize="end"/>
     </LinearLayout>
 </LinearLayout>

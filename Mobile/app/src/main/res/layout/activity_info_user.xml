@@ -5,7 +5,6 @@
     android:layout_height="match_parent"
     android:background="#F8F9FA">
 
-    <!-- 1. Header -->
     <LinearLayout
         android:id="@+id/headerProfile"
         android:layout_width="match_parent"
@@ -43,7 +42,6 @@
             app:tint="#FFFFFF" />
     </LinearLayout>
 
-    <!-- 2. Body Nội dung thông tin -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -52,7 +50,6 @@
         android:orientation="vertical"
         android:padding="20dp">
 
-        <!-- Ảnh đại diện (Hình tròn) -->
         <androidx.cardview.widget.CardView
             android:layout_width="120dp"
             android:layout_height="120dp"
@@ -69,7 +66,6 @@
                 android:background="#E0E0E0" />
         </androidx.cardview.widget.CardView>
 
-        <!-- Khối thông tin chi tiết -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -96,7 +92,6 @@
 
                 <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#EEEEEE"/>
 
-                <!-- Email/SĐT -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -115,7 +110,6 @@
                     android:drawablePadding="8dp"
                     android:layout_marginTop="4dp"/>
 
-                <!-- Địa chỉ -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -133,9 +127,7 @@
                     android:drawableStart="@android:drawable/ic_menu_mylocation"
                     android:drawablePadding="8dp"
                     android:layout_marginTop="4dp"/>
-                <!-- Thêm vào bên trong LinearLayout của CardView thông tin -->
 
-                <!-- Vai trò (Role) -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -147,7 +139,7 @@
                     android:id="@+id/txtUserRole"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Người bán / Người mua"
+                    android:text="Admin"
                     android:textColor="#1976D2"
                     android:textStyle="bold"
                     android:textSize="15sp"
@@ -157,7 +149,6 @@
 
                 <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#EEEEEE" android:layout_marginTop="12dp"/>
 
-                <!-- Nút Xem đơn hàng (Dạng nút bấm thanh mảnh) -->
                 <LinearLayout
                     android:id="@+id/btnOrderHistory"
                     android:layout_width="match_parent"
@@ -191,12 +182,46 @@
                         app:tint="#CCCCCC" />
                 </LinearLayout>
 
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#EEEEEE"/>
+
+                <LinearLayout
+                    android:id="@+id/btnAdminApprove"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingVertical="15dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?attr/selectableItemBackground"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@android:drawable/ic_menu_manage"
+                        app:tint="#1976D2" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:text="Phê duyệt &amp; Xử lý báo cáo"
+                        android:textColor="#333333"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@android:drawable/ic_media_play"
+                        app:tint="#CCCCCC" />
+                </LinearLayout>
+
             </LinearLayout>
         </androidx.cardview.widget.CardView>
-
     </LinearLayout>
 
-    <!-- 3. Nút Đăng xuất ở dưới cùng -->
     <Button
         android:id="@+id/btnLogout"
         android:layout_width="match_parent"

@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Dùng LinearLayout Vertical làm gốc để Header không bị cuộn theo nội dung -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -7,7 +6,6 @@
     android:background="#F2F2F2"
     android:orientation="vertical">
 
-    <!-- 1. Header cố định trên cùng -->
     <RelativeLayout
         android:id="@+id/layoutHeader"
         android:layout_width="match_parent"
@@ -35,7 +33,6 @@
             android:textStyle="bold" />
     </RelativeLayout>
 
-    <!-- 2. NỘI DUNG (Phần này sẽ cuộn được) -->
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -49,13 +46,15 @@
             android:paddingVertical="10dp"
             android:paddingBottom="20dp">
 
-            <!-- GÓI 1: CƠ BẢN -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/cardPromoBasic"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
                 android:layout_marginVertical="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="3dp">
 
@@ -120,13 +119,15 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- GÓI 2: VIP -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/cardPromoVIP"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
                 android:layout_marginVertical="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="3dp">
 
@@ -167,7 +168,7 @@
                             android:layout_marginTop="4dp"
                             android:background="#F9F9F9"
                             android:padding="4dp"
-                            android:text="Giá: 99.000 đ"
+                            android:text="Giá: 49.000 đ"
                             android:textColor="#FF5722"
                             android:textStyle="bold" />
 
@@ -198,10 +199,8 @@
         android:id="@+id/bottomNav"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:layout_alignParentBottom="true"
         android:background="#FFFFFF"
         android:orientation="horizontal"
-        android:padding="2dp"
         android:elevation="10dp"
         android:gravity="center">
 
@@ -210,10 +209,9 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:layout_margin="1dp"
-            android:padding="8dp"
+            android:padding="12dp"
             android:scaleType="fitCenter"
-            android:background="@drawable/bg_nav_button"
+            android:background="?attr/selectableItemBackground"
             android:src="@drawable/home" />
 
         <ImageButton
@@ -221,10 +219,9 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:layout_margin="1dp"
-            android:padding="8dp"
+            android:padding="12dp"
             android:scaleType="fitCenter"
-            android:background="@drawable/bg_nav_button"
+            android:background="?attr/selectableItemBackground"
             android:src="@drawable/promotion" />
 
         <ImageButton
@@ -232,10 +229,9 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:layout_margin="1dp"
-            android:padding="8dp"
+            android:padding="12dp"
             android:scaleType="fitCenter"
-            android:background="@drawable/bg_nav_button"
+            android:background="?attr/selectableItemBackground"
             android:src="@drawable/add" />
 
         <ImageButton
@@ -243,10 +239,9 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:layout_margin="1dp"
-            android:padding="8dp"
+            android:padding="12dp"
             android:scaleType="fitCenter"
-            android:background="@drawable/bg_nav_button"
+            android:background="?attr/selectableItemBackground"
             android:src="@drawable/account" />
 
     </LinearLayout>
