@@ -50,7 +50,7 @@ class LoginActivity : AppCompatActivity() {
                     val sharedPref = getSharedPreferences("UserPrefs", MODE_PRIVATE)
                     val editor = sharedPref.edit()
                     editor.putString("USER_NAME", userName)
-                    editor.putBoolean("IS_LOGGED_IN", false)
+                    editor.putBoolean("IS_LOGGED_IN", true)
                     editor.apply()
 
 

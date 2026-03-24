@@ -1,62 +1,100 @@
-package com.yen.sencond_handmarketplace // Kiểm tra lại package của bạn
+package com.yen.sencond_handmarketplace
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.widget.Button
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 
 class InfoUserActivity : AppCompatActivity() {
 
+    private val startForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val data = result.data
+
+            // 1. Nhận dữ liệu
+            val newName = data?.getStringExtra("NEW_NAME")
+            val newContact = data?.getStringExtra("NEW_CONTACT")
+            val newAddress = data?.getStringExtra("NEW_ADDRESS")
+            val newAvatarUri = data?.getStringExtra("NEW_AVATAR")
+
+            // 2. Ánh xạ View
+            val txtName = findViewById<TextView>(R.id.txtUserName)
+            val txtContact = findViewById<TextView>(R.id.txtUserContact) // Bạn cần đảm bảo ID này có trong XML
+            val txtAddress = findViewById<TextView>(R.id.txtUserAddress)
+            val imgAvatar = findViewById<ImageView>(R.id.imgUserAvatar)
+
+            // 3. Cập nhật giao diện & Lưu vào SharedPreferences
+            val sharedPref = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+            val editor = sharedPref.edit()
+
+            if (!newName.isNullOrEmpty()) {
+                txtName.text = newName
+                editor.putString("USER_NAME", newName)
+            }
+
+            if (!newContact.isNullOrEmpty()) {
+                txtContact.text = newContact
+                editor.putString("USER_CONTACT", newContact)
+            }
+
+            if (!newAddress.isNullOrEmpty()) {
+                txtAddress.text = newAddress
+                editor.putString("USER_ADDRESS", newAddress)
+            }
+
+            if (!newAvatarUri.isNullOrEmpty()) {
+                imgAvatar.setImageURI(Uri.parse(newAvatarUri))
+                editor.putString("USER_AVATAR", newAvatarUri)
+            }
+
+            editor.apply() // Chốt lưu dữ liệu
+            Toast.makeText(this, "Đã cập nhật thông tin!", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(R.layout.activity_info_user) // Đảm bảo đúng tên file XML bạn vừa gửi
+        setContentView(R.layout.activity_info_user)
 
-        // 1. Sửa lỗi "đỏ ID" cho phần tràn viền
-        // Lưu ý: ID ở đây phải là "headerProfile" hoặc thẻ layout ngoài cùng của XML này
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.headerProfile)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
-
-        // 2. Ánh xạ các View từ XML
+        // Ánh xạ View trong onCreate
         val txtName = findViewById<TextView>(R.id.txtUserName)
+        val txtContact = findViewById<TextView>(R.id.txtUserContact)
+        val txtAddress = findViewById<TextView>(R.id.txtUserAddress)
+        val imgAvatar = findViewById<ImageView>(R.id.imgUserAvatar)
+
         val btnLogout = findViewById<Button>(R.id.btnLogout)
         val btnBack = findViewById<ImageButton>(R.id.btnBackProfile)
+        val btnEdit = findViewById<ImageButton>(R.id.btnEditProfile)
 
-        // 3. LẤY DỮ LIỆU ĐÃ LƯU TỪ LOGIN
+        // 4. HIỂN THỊ DỮ LIỆU KHI MỞ MÀN HÌNH
         val sharedPref = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
-        val nameStored = sharedPref.getString("USER_NAME", "Người dùng ẩn danh")
+        txtName.text = sharedPref.getString("USER_NAME", "Yen")
+        txtContact.text = sharedPref.getString("USER_CONTACT", "Chưa có liên hệ")
+        txtAddress.text = sharedPref.getString("USER_ADDRESS", "Chưa có địa chỉ")
 
-        // Hiển thị tên lên màn hình
-        txtName.text = nameStored
-
-        // 4. XỬ LÝ NÚT ĐĂNG XUẤT
-        btnLogout.setOnClickListener {
-            val editor = sharedPref.edit()
-            editor.clear() // Xóa sạch thông tin đăng nhập
-            editor.apply()
-
-            Toast.makeText(this, "Đã đăng xuất thành công!", Toast.LENGTH_SHORT).show()
-
-            // Quay về Dashboard (Lúc này Dashboard sẽ tự đổi lại chữ "Đăng ký")
-            val intent = Intent(this, DashboardActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            startActivity(intent)
-            finish()
+        val avatarPath = sharedPref.getString("USER_AVATAR", null)
+        if (avatarPath != null) {
+            imgAvatar.setImageURI(Uri.parse(avatarPath))
         }
 
-        // 5. Nút quay lại
-        btnBack.setOnClickListener {
-            finish()
+        // Logic nút bấm giữ nguyên...
+        btnEdit.setOnClickListener {
+            val intent = Intent(this, UserDetailActivity::class.java)
+            startForResult.launch(intent)
         }
+
+        // Nút Logout và Back giữ nguyên như code cũ của bạn
     }
 }

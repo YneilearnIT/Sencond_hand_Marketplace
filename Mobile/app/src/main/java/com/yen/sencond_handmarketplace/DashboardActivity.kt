@@ -3,13 +3,32 @@ package com.yen.sencond_handmarketplace
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.ViewGroup
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import android.widget.ViewFlipper
 import androidx.appcompat.app.AppCompatActivity
+import com.bumptech.glide.Glide
+
+// 1. Cấu trúc lưu trữ 1 sản phẩm
+data class Product(
+    val title: String,
+    val price: String,
+    val address: String,
+    val description: String,
+    val imageUrls: List<String>
+)
 
 class DashboardActivity : AppCompatActivity() {
+
+    // 2. Database ảo
+    companion object {
+        val databaseTamThoi = mutableListOf<Product>()
+    }
 
     private lateinit var layoutProductList: LinearLayout
     private lateinit var txtUserStatus: TextView
@@ -18,7 +37,7 @@ class DashboardActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_dashboard)
 
-        // 1. ÁNH XẠ VIEW
+        // --- ÁNH XẠ VIEW ---
         txtUserStatus = findViewById(R.id.txtGoToRegister)
         layoutProductList = findViewById(R.id.layoutProductList)
         val btnNavHome = findViewById<ImageButton>(R.id.btnNavHome)
@@ -26,50 +45,85 @@ class DashboardActivity : AppCompatActivity() {
         val btnProfile = findViewById<ImageButton>(R.id.btnNavProfile)
         val btnNavAdd = findViewById<ImageButton>(R.id.btnNavAdd)
 
-        // 2. XỬ LÝ NHẤN CHỮ "ĐĂNG KÝ" (Ở HEADER)
+        // --- XỬ LÝ CLICK ---
         txtUserStatus.setOnClickListener {
             val sharedPref = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
             val isLoggedIn = sharedPref.getBoolean("IS_LOGGED_IN", false)
-
             if (!isLoggedIn) {
                 startActivity(Intent(this, RegisterActivity::class.java))
             } else {
-                // Nếu đã đăng nhập, bấm vào tên có thể mở Profile luôn cho tiện
                 startActivity(Intent(this, InfoUserActivity::class.java))
             }
         }
-        // 1. NHẤN HÌNH NGÔI NHÀ (HOME)
+
         btnNavHome.setOnClickListener {
-            val intent = Intent(this, DashboardActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(this, DashboardActivity::class.java))
         }
 
-        // 2. NHẤN HÌNH SỐ 2 (PROMOTION)
         btnNavPromo.setOnClickListener {
-            // Chuyển sang màn hình PromotionActivity
-            val intent = Intent(this, PromotionActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(this, PromotionActivity::class.java))
         }
 
-        // 3. XỬ LÝ NHẤN ICON AVATAR (Ở BOTTOM NAV)
         btnProfile.setOnClickListener {
             val sharedPref = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
             val isLoggedIn = sharedPref.getBoolean("IS_LOGGED_IN", false)
-
             if (isLoggedIn) {
-                // Nếu ĐÃ đăng nhập: Sang màn hình Info
                 startActivity(Intent(this, InfoUserActivity::class.java))
             } else {
-                // Nếu CHƯA đăng nhập: Báo lỗi và bắt sang Login
-                Toast.makeText(this, "Vui lòng đăng nhập để xem thông tin!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Vui lòng đăng nhập!", Toast.LENGTH_SHORT).show()
                 startActivity(Intent(this, LoginActivity::class.java))
             }
         }
 
+        btnNavAdd.setOnClickListener {
+            startActivity(Intent(this, PostingActivity::class.java))
+        }
 
+        // --- HỨNG DỮ LIỆU TỪ TRANG ĐĂNG TIN ---
+        val newTitle = intent.getStringExtra("TITLE")
+        if (newTitle != null) {
+            val newPrice = intent.getStringExtra("PRICE") ?: ""
+            val newAddress = intent.getStringExtra("ADDRESS") ?: ""
+            val newDesc = intent.getStringExtra("DESC") ?: ""
+            val newImages = intent.getStringArrayListExtra("IMAGES") ?: arrayListOf()
+
+            databaseTamThoi.add(0, Product(newTitle, newPrice, newAddress, newDesc, newImages))
+            intent.removeExtra("TITLE")
+        }
+
+        // Hiển thị sản phẩm (Chỉ chạy 1 lần trong onCreate)
+        layoutProductList.removeAllViews()
+        for (product in databaseTamThoi) {
+            addProductToUI(product)
+        }
     }
 
-    // 5. CẬP NHẬT GIAO DIỆN MỖI KHI QUAY LẠI (TỪ LOGIN/INFO TRỞ VỀ)
+    // Hàm phụ: Đổ dữ liệu lên UI
+    private fun addProductToUI(product: Product) {
+        val view = LayoutInflater.from(this).inflate(R.layout.item_product, layoutProductList, false)
+
+        view.findViewById<TextView>(R.id.itemTvTitle).text = product.title
+        view.findViewById<TextView>(R.id.itemTvPrice).text = product.price
+        view.findViewById<TextView>(R.id.itemTvAddress).text = product.address
+        view.findViewById<TextView>(R.id.itemTvDescription).text = product.description
+
+        val viewFlipper = view.findViewById<ViewFlipper>(R.id.itemViewFlipper)
+        if (product.imageUrls.isNotEmpty()) {
+            for (url in product.imageUrls) {
+                val imageView = ImageView(this)
+                imageView.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+                imageView.scaleType = ImageView.ScaleType.CENTER_CROP
+                Glide.with(this).load(url).into(imageView)
+                viewFlipper.addView(imageView)
+            }
+            if (product.imageUrls.size <= 1) viewFlipper.stopFlipping()
+        } else {
+            viewFlipper.visibility = android.view.View.GONE
+        }
+        layoutProductList.addView(view)
+    }
+
+    // --- CẬP NHẬT KHI QUAY LẠI (TỪ LOGIN/INFO TRỞ VỀ) ---
     override fun onResume() {
         super.onResume()
         val sharedPref = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
