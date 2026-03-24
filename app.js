@@ -147,10 +147,6 @@ app.post('/post-ad', checkLogin, async (req, res) => {
             [seller_id, category_id, title, description, price, condition, location]
         );
         const newListingId = listingResult.rows[0].listing_id;
-<<<<<<< HEAD
-
-=======
->>>>>>> 83361003ce4ec5d89c1bccc589e14e14ada3d842
         await pool.query(
             `INSERT INTO listing_images (listing_id, image_url, is_thumbnail) VALUES ($1, $2, TRUE)`,
             [newListingId, image_url || 'default.jpg']
