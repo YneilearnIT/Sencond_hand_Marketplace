@@ -5,7 +5,6 @@
     android:layout_height="match_parent"
     android:background="#E0E0E0">
 
-    <!-- Top Blue Bar -->
     <LinearLayout
         android:id="@+id/topBar"
         android:layout_width="match_parent"
@@ -48,7 +47,6 @@
 
     </LinearLayout>
 
-    <!-- Search Bar Section -->
     <LinearLayout
         android:id="@+id/searchSection"
         android:layout_width="match_parent"
@@ -91,7 +89,6 @@
             android:src="@drawable/cart" />
     </LinearLayout>
 
-    <!-- Product List -->
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -99,42 +96,12 @@
         android:layout_below="@id/searchSection">
 
         <LinearLayout
+            android:id="@+id/layoutProductList"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="8dp">
 
-            <!-- Product Item (Lặp lại Block này) -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="#D3D3D3"
-                android:padding="12dp"
-                android:layout_marginBottom="8dp">
-
-                <ImageView
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    android:background="#FFFFFF"
-                    android:src="@android:drawable/ic_menu_gallery" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
-                    android:orientation="vertical">
-
-                    <TextView android:layout_width="match_parent" android:layout_height="30dp"
-                        android:background="#F0F8FF" android:text="Tên sản phẩm" android:gravity="center_vertical" android:paddingStart="8dp" android:layout_marginBottom="4dp"/>
-                    <TextView android:layout_width="match_parent" android:layout_height="30dp"
-                        android:background="#F0F8FF" android:text="Giá sản phẩm" android:gravity="center_vertical" android:paddingStart="8dp" android:layout_marginBottom="4dp"/>
-                    <TextView android:layout_width="match_parent" android:layout_height="30dp"
-                        android:background="#F0F8FF" android:text="Địa chỉ" android:gravity="center_vertical" android:paddingStart="8dp" android:layout_marginBottom="4dp"/>
-                    <TextView android:layout_width="match_parent" android:layout_height="30dp"
-                        android:background="#F0F8FF" android:text="Mô tả sản phẩm" android:gravity="center_vertical" android:paddingStart="8dp"/>
-                </LinearLayout>
-            </LinearLayout>
-            <!-- Thêm nhiều block tương tự ở đây -->
         </LinearLayout>
     </ScrollView>
 
