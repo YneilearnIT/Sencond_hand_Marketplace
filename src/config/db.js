@@ -1,41 +1,25 @@
 require('dotenv').config();
-const sql = require('mssql');
+const sql = require('mssql'); // Quay lại thư viện chuẩn
 
 const config = {
-    user: process.env.DB_USER || 'sa', // Tài khoản đăng nhập SSMS (thường là sa)
-    password: process.env.DB_PASSWORD || '2005', // Mật khẩu của bạn
-    server: process.env.DB_SERVER || 'localhost', 
-    database: process.env.DB_DATABASE || 'C2C',
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    server: process.env.DB_SERVER,
+    database: process.env.DB_DATABASE,
     options: {
-        encrypt: false, // Để false nếu chạy localhost
-        trustServerCertificate: true // Quan trọng để tránh lỗi chứng chỉ trên máy cá nhân
+        encrypt: false,
+        trustServerCertificate: true
     }
 };
 
 const poolPromise = new sql.ConnectionPool(config)
     .connect()
     .then(pool => {
-        console.log('✅ Đã kết nối thành công với SQL Server (SSMS)');
+        console.log(`✅ KẾT NỐI SQL SERVER THÀNH CÔNG (Tài khoản: ${config.user})!`);
         return pool;
     })
     .catch(err => {
-        console.error('❌ Kết nối SQL Server thất bại!', err);
-        process.exit(1);
+        console.error('❌ Kết nối thất bại!', err.message);
     });
 
-module.exports = {
-    sql,
-    query: async (text, params) => {
-        const pool = await poolPromise;
-        const request = pool.request();
-        
-        // Chuyển đổi tham số từ kiểu $1, $2 sang kiểu của mssql nếu cần
-        if (params) {
-            params.forEach((val, index) => {
-                request.input(`param${index + 1}`, val);
-                text = text.replace(`$${index + 1}`, `@param${index + 1}`);
-            });
-        }
-        return request.query(text);
-    }
-};
+module.exports = { sql, poolPromise };

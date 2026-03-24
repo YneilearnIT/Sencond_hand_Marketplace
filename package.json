@@ -22,6 +22,7 @@
     "express-handlebars": "^8.0.3",
     "express-session": "^1.19.0",
     "jsonwebtoken": "^9.0.3",
+    "msnodesqlv8": "^5.1.5",
     "mssql": "^12.2.1"
   },
   "devDependencies": {

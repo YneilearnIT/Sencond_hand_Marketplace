@@ -56,35 +56,26 @@ app.use('/api', apiRoutes);
 // --- CÁC ROUTE GIAO DIỆN ---
 
 // Trang chủ - ĐÃ SỬA QUERY ĐỂ HIỆN ẢNH
+// Thay thế đoạn app.get('/') bằng code sạch này:
 app.get('/', async (req, res) => {
     try {
-        const pool = await poolPromise;
-        // MSSQL dùng TOP thay vì LIMIT, dùng số 1 thay vì TRUE cho kiểu BIT
+        const pool = await poolPromise; // Lấy kết nối từ db.js
         const query = `
-<<<<<<< HEAD
             SELECT l.listing_id AS id, l.title, l.price, l.condition_percentage AS condition, 
                    l.location_gps AS location, 
-                   CASE 
-                       WHEN i.image_url LIKE 'http%' THEN i.image_url 
-                       ELSE '/images/' || i.image_url 
-                   END AS img
-=======
-            SELECT TOP 8 l.listing_id AS id, l.title, l.price, l.condition_percentage AS condition, 
-                   l.location_gps AS location, i.image_url AS img
->>>>>>> 83361003ce4ec5d89c1bccc589e14e14ada3d842
+                   '/images/' + i.image_url AS img
             FROM listings l
             LEFT JOIN listing_images i ON l.listing_id = i.listing_id AND i.is_thumbnail = 1
             WHERE l.status = 'Active'
             ORDER BY l.is_vip DESC, l.created_at DESC
         `;
-        const result = await pool.request().query(query);
-        res.render('home', { listings: result.recordset }); // MSSQL trả về recordset thay vì rows
+        const result = await pool.request().query(query); // mssql dùng .request().query()
+        res.render('home', { listings: result.recordset }); // mssql trả dữ liệu trong recordset
     } catch (err) {
         console.error("Lỗi tải trang chủ:", err);
         res.render('home', { listings: [] });
     }
 });
-
 // Đăng nhập
 app.get('/login', (req, res) => res.render('login'));
 app.post('/login', async (req, res) => {
