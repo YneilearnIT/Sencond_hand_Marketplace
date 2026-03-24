@@ -1,0 +1,136 @@
+<div class="container mt-4 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold m-0 text-danger"><i class="fas fa-user-shield me-2"></i> Khu vực Admin</h2>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-md-6">
+            <div class="card bg-primary text-white shadow border-0 h-100 p-3">
+                <div class="card-body d-flex align-items-center">
+                    <i class="fas fa-users fa-3x me-4 opacity-50"></i>
+                    <div>
+                        <h5 class="card-title fw-bold mb-1">Tổng người dùng</h5>
+                        <h2 class="display-5 fw-bold m-0">{{totalUsers}}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card bg-success text-white shadow border-0 h-100 p-3">
+                <div class="card-body d-flex align-items-center">
+                    <i class="fas fa-box-open fa-3x me-4 opacity-50"></i>
+                    <div>
+                        <h5 class="card-title fw-bold mb-1">Sản phẩm đang hiển thị</h5>
+                        <h2 class="display-5 fw-bold m-0">{{totalListings}}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3 d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <h5 class="m-0 fw-bold"><i class="fas fa-list me-2"></i> Quản lý toàn bộ tin đăng</h5>
+            
+            <form action="/admin" method="GET" class="d-flex" style="max-width: 600px; width: 100%;">
+                
+                <select name="category" class="form-select me-2 border-primary" style="width: 200px; cursor: pointer;">
+                    <option value="">Tất cả danh mục</option>
+                    {{#each categories}}
+                        <option value="{{this.category_id}}" {{#if (eq this.category_id ../categoryQuery)}}selected{{/if}}>
+                            {{this.category_name}}
+                        </option>
+                    {{/each}}
+                </select>
+
+                <input type="text" name="search" class="form-control me-2 border-primary" placeholder="Tìm tên sản phẩm..." value="{{searchQuery}}">
+                
+                <button type="submit" class="btn btn-primary fw-bold text-nowrap"><i class="fas fa-filter"></i> Lọc</button>
+                
+                {{#if hasFilter}}
+                    <a href="/admin" class="btn btn-outline-secondary ms-2 text-nowrap" title="Xóa bộ lọc"><i class="fas fa-times"></i></a>
+                {{/if}}
+            </form>
+
+        </div>
+        <div class="card-body p-0 table-responsive">
+            <table class="table table-hover align-middle m-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Tên sản phẩm</th>
+                        <th>Danh mục</th>
+                        <th>Người bán</th>
+                        <th>Giá tiền</th>
+                        <th>Trạng thái</th>
+                        <th class="text-end pe-4">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each allListings}}
+                    <tr id="admin-listing-{{this.id}}">
+                        <td class="ps-4 fw-medium">{{this.title}}</td>
+                        <td><span class="badge bg-info text-dark">{{this.category_name}}</span></td>
+                        <td><i class="fas fa-user-circle text-secondary me-1"></i> {{this.seller_name}}</td>
+                        <td class="text-danger fw-bold">{{this.price}} đ</td>
+                        <td>
+                            {{#if (eq this.status 'Active')}}
+                                <span class="badge bg-success">Hiển thị</span>
+                            {{else}}
+                                <span class="badge bg-secondary">Đã gỡ</span>
+                            {{/if}}
+                        </td>
+                        <td class="text-end pe-4">
+                            {{#if (eq this.status 'Active')}}
+                            <button class="btn btn-sm btn-outline-danger fw-bold" onclick="adminDeleteListing({{this.id}})">
+                                <i class="fas fa-trash-alt"></i> Xóa vi phạm
+                            </button>
+                            {{/if}}
+                        </td>
+                    </tr>
+                    {{else}}
+                    <tr>
+                        <td colspan="6" class="text-center py-5 text-muted">
+                            <i class="fas fa-search fa-3x mb-3 opacity-25"></i>
+                            <h5>Không tìm thấy sản phẩm nào!</h5>
+                            <p>Thử đổi từ khóa hoặc danh mục khác xem sao.</p>
+                        </td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    function adminDeleteListing(id) {
+        Swal.fire({
+            title: 'Quyền sinh quyền sát!',
+            text: "Bạn có chắc muốn ép gỡ bài đăng này khỏi hệ thống?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Xóa ngay',
+            cancelButtonText: 'Hủy'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch('/admin/delete-listing', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ listing_id: id })
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        Swal.fire('Đã xóa!', 'Bài đăng đã bị gỡ khỏi sàn.', 'success').then(() => {
+                            window.location.reload(); 
+                        });
+                    } else {
+                        Swal.fire('Lỗi!', data.message, 'error');
+                    }
+                } catch (err) { console.error(err); }
+            }
+        });
+    }
+</script>

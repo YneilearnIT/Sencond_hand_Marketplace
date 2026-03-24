@@ -1,66 +1,9 @@
-/* Ghi đè nền mặc định để trang web có màu xám nhạt, làm nổi bật các thẻ Card màu trắng */
-body {
-    background-color: #f4f6f9 !important;
-}
-
-/* Background gradient cho Banner */
-.hero-banner {
-    background: linear-gradient(135deg, #e3f2fd 0%, #ffffff 100%);
-    border: 1px solid #bbdefb;
-}
-
-/* Cố định kích thước ảnh sản phẩm để các card bằng nhau dù ảnh tải lên khác kích cỡ */
-.product-img {
-    height: 180px;
-    object-fit: cover;
-}
-
-/* Hiệu ứng nổi lên khi di chuột vào sản phẩm */
-.product-card {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.product-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15) !important;
-}
-
-/* --- Thiết lập Bottom Nav cho Mobile --- */
-.bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: #fff;
-    display: flex;
-    justify-content: space-around;
-    padding: 8px 0 5px 0;
-    border-top: 1px solid #e0e0e0;
-    z-index: 1030;
-}
-
-.bottom-nav a {
-    text-align: center;
-    color: #6c757d;
-    text-decoration: none;
-    font-size: 11px;
-    flex: 1;
-}
-
-.bottom-nav a i {
-    font-size: 20px;
-    margin-bottom: 3px;
-    display: block;
-}
-
-.bottom-nav a:hover,
-.bottom-nav a:active {
-    color: #0d6efd; /* Màu xanh primary */
-}
-
-/* Tắt padding-bottom của thẻ main khi ở màn hình lớn (không dùng bottom nav) */
-@media (min-width: 992px) {
-    .content-container {
-        padding-bottom: 0 !important;
-    }
-}
+body { font-family: sans-serif; margin: 0; background: #f4f4f4; }
+nav { background: #fff; padding: 10px; border-bottom: 1px solid #ddd; }
+.product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; padding: 20px; }
+.product-card { background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+.price { color: red; font-weight: bold; }
+.post-form { max-width: 500px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; }
+.input-group { margin-bottom: 15px; }
+.input-group label { display: block; margin-bottom: 5px; }
+.input-group input, .input-group select, .input-group textarea { width: 100%; padding: 8px; }

@@ -36,19 +36,29 @@ android {
 }
 
 dependencies {
+<<<<<<< HEAD
     implementation("com.squareup.retrofit2:retrofit:3.0.0")
     implementation("com.squareup.retrofit2:converter-gson:3.0.0")
     implementation("com.squareup.okhttp3:okhttp:5.3.2")
+=======
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+>>>>>>> 7ec05b6a5ccc8b019cca11c35ccd913321cfd47f
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+<<<<<<< HEAD
 
     // Glide - Thư viện tải ảnh
     implementation(libs.glide)
     annotationProcessor(libs.glide.compiler)
 
+=======
+>>>>>>> 7ec05b6a5ccc8b019cca11c35ccd913321cfd47f
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

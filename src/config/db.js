@@ -1,27 +1,25 @@
-const sql = require('mssql');
 require('dotenv').config();
+const sql = require('mssql'); // Quay lại thư viện chuẩn
 
 const config = {
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
-    server: process.env.DB_SERVER, 
-    database: process.env.DB_NAME,
+    server: process.env.DB_SERVER,
+    database: process.env.DB_DATABASE,
     options: {
-        encrypt: false, // Phải để false khi chạy ở localhost
-        trustServerCertificate: true 
+        encrypt: false,
+        trustServerCertificate: true
     }
 };
 
-// Khởi tạo kết nối dạng Pool để tái sử dụng
 const poolPromise = new sql.ConnectionPool(config)
     .connect()
     .then(pool => {
-        console.log('✅ KẾT NỐI SQL SERVER THÀNH CÔNG!');
+        console.log(`✅ KẾT NỐI SQL SERVER THÀNH CÔNG (Tài khoản: ${config.user})!`);
         return pool;
     })
     .catch(err => {
-        console.error('❌ KẾT NỐI SQL SERVER THẤT BẠI:', err.message);
-        process.exit(-1);
+        console.error('❌ Kết nối thất bại!', err.message);
     });
 
 module.exports = { sql, poolPromise };

@@ -1,0 +1,68 @@
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold m-0"><i class="fas fa-box-open text-primary me-2"></i> Quản lý tin đăng của bạn</h2>
+        <a href="/post-ad" class="btn btn-outline-primary"><i class="fas fa-plus"></i> Đăng thêm đồ</a>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {{#each myListings}}
+        <div class="col" id="listing-{{this.id}}">
+            <div class="card h-100 shadow-sm border-0 position-relative">
+                <span class="badge bg-success position-absolute top-0 end-0 m-2 px-3 py-2">Đang hiển thị</span>
+                <img src="{{this.img}}" class="card-img-top" style="height: 200px; object-fit: cover;">
+                
+                <div class="card-body">
+                    <h5 class="card-title text-truncate">{{this.title}}</h5>
+                    <h6 class="text-danger fw-bold mb-3">{{this.price}} đ</h6>
+                </div>
+                
+                <div class="card-footer bg-white border-top-0 pb-3">
+                    <button class="btn btn-outline-danger w-100 fw-bold" onclick="deleteListing({{this.id}})">
+                        <i class="fas fa-trash-alt me-2"></i> Gỡ tin này
+                    </button>
+                </div>
+            </div>
+        </div>
+        {{else}}
+        <div class="col-12 text-center py-5">
+            <img src="https://cdn-icons-png.flaticon.com/512/1041/1041885.png" width="100" class="mb-3 opacity-50">
+            <h5 class="text-muted">Bạn chưa đăng bán sản phẩm nào.</h5>
+            <a href="/post-ad" class="btn btn-primary mt-3 rounded-pill px-4">Đăng tin ngay</a>
+        </div>
+        {{/each}}
+    </div>
+</div>
+
+<script>
+    function deleteListing(id) {
+        Swal.fire({
+            title: 'Bạn có chắc chắn?',
+            text: "Sản phẩm này sẽ bị gỡ xuống khỏi sàn giao dịch!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Đồng ý gỡ',
+            cancelButtonText: 'Hủy'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch('/my-listings/delete', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ listing_id: id })
+                    });
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        Swal.fire('Đã gỡ!', 'Tin đăng của bạn đã được xóa thành công.', 'success');
+                        // Làm biến mất thẻ sản phẩm trên màn hình
+                        document.getElementById('listing-' + id).remove();
+                    } else {
+                        Swal.fire('Lỗi!', data.message, 'error');
+                    }
+                } catch (err) { console.error(err); }
+            }
+        });
+    }
+</script>
