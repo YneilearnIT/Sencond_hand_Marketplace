@@ -1,12 +1,61 @@
-<h2>Sản phẩm gần đây </h2>
-<div class="product-grid">
-    {{#each listings}}
-    <div class="product-card">
-        <img src="{{this.img}}" alt="product">
-        <h3><a href="/product/{{this.id}}">{{this.title}}</a></h3>
-        <p class="price">{{this.price}} đ</p>
-        <p class="loc">{{this.location}}</p>
-        <p>Độ mới: {{this.condition}}%</p>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white py-3">
+                    <h4 class="mb-0"><i class="fas fa-plus-circle"></i> Đăng tin mới</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form action="/post-ad" method="POST">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Tiêu đề tin đăng</label>
+                            <input type="text" name="title" class="form-control" placeholder="Ví dụ: iPhone 13 Pro Max 256GB Gold" required>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Danh mục</label>
+                                <select name="category_id" class="form-select" required>
+                                    <option value="">Chọn danh mục...</option>
+                                    {{#each categories}}
+                                    <option value="{{this.category_id}}">{{this.category_name}}</option>
+                                    {{/each}}
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Giá bán (VNĐ)</label>
+                                <input type="number" name="price" class="form-control" placeholder="0" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Độ mới (%)</label>
+                                <input type="number" name="condition" class="form-control" min="1" max="100" value="95" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Khu vực giao dịch</label>
+                                <input type="text" name="location" class="form-control" placeholder="Ví dụ: Quận 1, TP.HCM" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Link ảnh sản phẩm</label>
+                            <input type="text" name="image_url" class="form-control" placeholder="Dán link ảnh tại đây...">
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Mô tả chi tiết</label>
+                            <textarea name="description" class="form-control" rows="4" placeholder="Mô tả tình trạng máy, phụ kiện đi kèm..."></textarea>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">Đăng tin ngay</button>
+                            <a href="/" class="btn btn-light text-muted">Hủy bỏ</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-    {{/each}}
 </div>

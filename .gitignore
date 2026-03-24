@@ -1,7 +1,11 @@
 node_modules/
 .idea/
 .vscode/
+<<<<<<< HEAD
 packege-lock.json
+=======
+package-lock.json
+>>>>>>> ae60e57fd27063610ad5798edce62244e6dc38e4
 *.iml
 .gradle
 /local.properties
