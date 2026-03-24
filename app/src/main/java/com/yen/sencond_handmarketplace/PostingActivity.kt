@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.view.View
 import android.widget.*
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -20,12 +21,13 @@ import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.Body
-import retrofit2.http.POST
 import java.io.ByteArrayOutputStream
 import java.util.ArrayList
 
 class PostingActivity : AppCompatActivity() {
+
+    // Nút quay lại trên giao diện
+    private lateinit var btnBack: View
 
     private lateinit var btnAddImage: LinearLayout
     // Khai báo danh sách chứa 5 ô hình ảnh
@@ -87,6 +89,24 @@ class PostingActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_post_listing)
 
+        // ----------------------------------------------------
+        // 1. XỬ LÝ NÚT QUAY LẠI TRÊN MÀN HÌNH (GIAO DIỆN)
+        // ----------------------------------------------------
+        // LƯU Ý: Thay "btnBack" bằng đúng ID nút mũi tên quay lại trong file XML của bạn
+        btnBack = findViewById(R.id.btnBack)
+        btnBack.setOnClickListener {
+            finish() // Đóng màn hình này, tự động lùi về Trang chủ (Dashboard)
+        }
+
+        // ----------------------------------------------------
+        // 2. XỬ LÝ NÚT QUAY LẠI CỦA ĐIỆN THOẠI (VUỐT/BẤM NÚT VẬT LÝ)
+        // ----------------------------------------------------
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                finish() // Đóng màn hình này, lùi về Trang chủ
+            }
+        })
+
         btnAddImage = findViewById(R.id.btnAddImage)
 
         // Ánh xạ 5 ô ảnh
@@ -136,7 +156,7 @@ class PostingActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // Bắt đầu quá trình Upload ảnh lên mây
+            // Bắt đầu quá trình Upload ảnh lên ImgBB
             startUploadingProcess()
         }
     }
@@ -156,7 +176,7 @@ class PostingActivity : AppCompatActivity() {
         btnConfirm.isEnabled = false
         uploadedUrls.clear()
         currentUploadIndex = 0
-        Toast.makeText(this, "Đang tải ${selectedBitmaps.size} ảnh lên hệ thống...", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Đang xử lý ${selectedBitmaps.size} ảnh...", Toast.LENGTH_SHORT).show()
         uploadSingleImageToImgbb(selectedBitmaps[currentUploadIndex])
     }
 
@@ -185,9 +205,9 @@ class PostingActivity : AppCompatActivity() {
                         // Tải tiếp ảnh tiếp theo
                         uploadSingleImageToImgbb(selectedBitmaps[currentUploadIndex])
                     } else {
-                        // TẢI ẢNH XONG HẾT -> LƯU VÀO SQL SERVER
-                        Toast.makeText(this@PostingActivity, "Đang lưu dữ liệu vào Database...", Toast.LENGTH_SHORT).show()
-                        saveDataToYourSQLServer()
+                        // TẢI ẢNH XONG HẾT -> CHUYỂN THẲNG SANG TRANG CHỦ
+                        Toast.makeText(this@PostingActivity, "Đăng tin thành công!", Toast.LENGTH_SHORT).show()
+                        goToDashboard()
                     }
                 }
             }
@@ -199,66 +219,16 @@ class PostingActivity : AppCompatActivity() {
         })
     }
 
-    // HÀM LƯU DỮ LIỆU VÀO SQL SERVER (BACKEND)
-    private fun saveDataToYourSQLServer() {
-        val productData = ProductRequest(
-            title = edtTitle.text.toString().trim(),
-            price = edtPrice.text.toString().trim(),
-            address = edtAddress.text.toString().trim(),
-            description = edtDescription.text.toString().trim(),
-            category = selectedCategoryName,
-            images = uploadedUrls
-        )
-
-        // CHÚ Ý: Đổi IP này thành IP Backend thật của bạn (VD: IP của máy tính chạy Node.js)
-        val retrofit = Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:3000/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-
-        val api = retrofit.create(MyBackendApi::class.java)
-
-        api.createNewProduct(productData).enqueue(object : Callback<ApiResponse> {
-            override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
-                btnConfirm.isEnabled = true
-                if (response.isSuccessful && response.body()?.success == true) {
-                    Toast.makeText(this@PostingActivity, "Đăng tin thành công!", Toast.LENGTH_SHORT).show()
-
-                    // LƯU THÀNH CÔNG -> BAY SANG TRANG CHỦ
-                    val intent = Intent(this@PostingActivity, DashboardActivity::class.java)
-                    // (Bạn có thể bỏ gửi Intent Extra ở đây nếu DashboardActivity tự động load lại dữ liệu từ SQL)
-                    intent.putExtra("TITLE", edtTitle.text.toString().trim())
-                    intent.putExtra("PRICE", edtPrice.text.toString().trim() + " VNĐ")
-                    intent.putExtra("ADDRESS", edtAddress.text.toString().trim())
-                    intent.putExtra("DESC", edtDescription.text.toString().trim())
-                    intent.putStringArrayListExtra("IMAGES", uploadedUrls)
-
-                    startActivity(intent)
-                    finish()
-                } else {
-                    // Cấp cứu: Nếu Server lỗi, vẫn cho phép sang trang chủ (Để test UI)
-                    // *Xóa phần này đi khi code Backend của bạn đã hoàn chỉnh
-                    fallbackToDashboard()
-                }
-            }
-
-            override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
-                btnConfirm.isEnabled = true
-                Toast.makeText(this@PostingActivity, "Không kết nối được SQL. Chuyển sang chế độ Offline.", Toast.LENGTH_SHORT).show()
-                fallbackToDashboard() // Cấp cứu: Lỗi mạng vẫn cho test UI
-            }
-        })
-    }
-
-    // Hàm cấp cứu: Dùng để test giao diện khi Backend chưa chạy
-    private fun fallbackToDashboard() {
+    // HÀM MANG DỮ LIỆU BAY THẲNG SANG TRANG CHỦ
+    private fun goToDashboard() {
         val intent = Intent(this@PostingActivity, DashboardActivity::class.java)
         intent.putExtra("TITLE", edtTitle.text.toString().trim())
         intent.putExtra("PRICE", edtPrice.text.toString().trim() + " VNĐ")
         intent.putExtra("ADDRESS", edtAddress.text.toString().trim())
         intent.putExtra("DESC", edtDescription.text.toString().trim())
         intent.putStringArrayListExtra("IMAGES", uploadedUrls)
+
         startActivity(intent)
-        finish()
+        finish() // Đóng trang đăng tin lại
     }
 }
