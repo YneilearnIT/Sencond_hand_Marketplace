@@ -45,12 +45,31 @@
                         <a class="nav-link dropdown-toggle text-white fw-medium" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
                             <i class="fas fa-user-circle fs-5 align-middle me-1"></i> {{user.full_name}}
                         </a>
+                        
                         <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">
-                            <li><a class="dropdown-item" href="#">Trang cá nhân</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item text-danger fw-bold" href="/logout"><i class="fas fa-sign-out-alt me-2"></i> Đăng xuất</a></li>
-                        </ul>
-                    </li>
+    
+    {{#if isAdmin}}
+    <li>
+        <a class="dropdown-item fw-bold text-danger" href="/admin">
+            <i class="fas fa-user-shield me-2"></i> Trang Quản Trị
+        </a>
+    </li>
+    <li><hr class="dropdown-divider"></li>
+    {{/if}}
+
+    <li>
+        <a class="dropdown-item fw-bold text-primary" href="/my-listings">
+            <i class="fas fa-list me-2"></i> Quản lý tin đăng
+        </a>
+    </li>
+    <li><hr class="dropdown-divider"></li>
+    <li>
+        <a class="dropdown-item text-danger fw-bold" href="/logout">
+            <i class="fas fa-sign-out-alt me-2"></i> Đăng xuất
+        </a>
+    </li>
+</ul>
+                        </li>
                     {{else}}
                     <li class="nav-item"><a class="nav-link text-white fw-medium" href="/login">Đăng nhập</a></li>
                     <li class="nav-item"><a class="btn btn-outline-light btn-sm ms-2 rounded-pill px-3" href="/register">Đăng ký</a></li>
@@ -90,6 +109,7 @@
                         body: JSON.stringify({ listing_id })
                     });
                     const data = await response.json();
+                    
                     if (data.success) {
                         const badge = document.getElementById('cart-badge');
                         if (badge) badge.innerText = data.cartCount;
@@ -99,6 +119,21 @@
                         }
                         const toast = new bootstrap.Toast(document.getElementById('cartToast'));
                         toast.show();
+                    } else {
+                        Swal.fire({
+                            title: 'Yêu cầu đăng nhập!',
+                            text: data.message,
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#0d6efd',
+                            cancelButtonColor: '#6c757d',
+                            confirmButtonText: 'Đăng nhập ngay',
+                            cancelButtonText: 'Để sau'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = data.redirect;
+                            }
+                        });
                     }
                 } catch (err) { console.error('Lỗi:', err); }
             });
