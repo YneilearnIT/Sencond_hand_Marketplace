@@ -1,5 +1,4 @@
 const express = require('express');
-<<<<<<< HEAD
 const path = require('path');
 const { engine } = require('express-handlebars');
 const cookieParser = require('cookie-parser');
@@ -43,7 +42,6 @@ app.use(session({
     secret: 'shm_secret_key_2026', resave: false, saveUninitialized: true, cookie: { secure: false } 
 }));
 
-// Middleware kiểm tra đăng nhập bằng Popup đẹp
 const checkLogin = (req, res, next) => {
     if (req.session.user) next();
     else showPopup(res, 'Cảnh báo!', 'Bạn cần đăng nhập để sử dụng tính năng này!', 'warning', '/login');
@@ -102,7 +100,7 @@ app.get('/product/:id', async (req, res) => {
     } catch (err) { res.status(500).send('Lỗi máy chủ'); }
 });
 
-// --- ROUTE GIỎ HÀNG (AJAX) ---
+// --- ROUTE GIỎ HÀNG ---
 app.post('/cart/add', (req, res) => {
     const { listing_id } = req.body;
     if (!req.session.cart.includes(listing_id)) req.session.cart.push(listing_id);
@@ -125,7 +123,7 @@ app.post('/cart/remove', (req, res) => {
     res.redirect('/cart');
 });
 
-// --- ROUTE TÀI KHOẢN (Đã dùng Popup Đẹp) ---
+// --- ROUTE TÀI KHOẢN ---
 app.get('/login', (req, res) => res.render('login'));
 app.post('/login', async (req, res) => {
     try {
@@ -152,7 +150,7 @@ app.post('/register', async (req, res) => {
 });
 app.get('/logout', (req, res) => { req.session.destroy(); res.redirect('/'); });
 
-// --- ROUTE ĐĂNG TIN (Đã dùng Popup Đẹp) ---
+// --- ROUTE ĐĂNG TIN ---
 app.get('/post-ad', checkLogin, async (req, res) => {
     try {
         const pool = await poolPromise;
@@ -172,50 +170,3 @@ app.post('/post-ad', checkLogin, async (req, res) => {
 });
 
 app.listen(PORT, () => console.log(`🚀 Hệ thống SHM đang chạy tại: http://localhost:${PORT}`));
-=======
-const { engine } = require('express-handlebars');
-const path = require('path');
-
-const app = express();
-
-// Cấu hình Handlebars
-app.engine('hbs', engine({ extname: '.hbs', defaultLayout: 'main' }));
-app.set('view engine', 'hbs');
-app.set('views', './views');
-
-app.use(express.static('public'));
-app.use(express.urlencoded({ extended: true }));
-
-// Dữ liệu mẫu (Mock Data) dựa trên đặc tả 
-const categories = [
-    { id: 1, name: 'Điện thoại' }, { id: 2, name: 'Xe cộ' }, { id: 3, name: 'Đồ gia dụng' }
-];
-
-let listings = [
-    { id: 1, title: 'iPhone 13 Pro Max', price: '15.000.000', location: 'Quận 7, HCM', condition: 95, img: 'https://via.placeholder.com/150' },
-    { id: 2, title: 'Xe Honda Vision 2022', price: '28.500.000', location: 'Bình Thạnh, HCM', condition: 90, img: 'https://via.placeholder.com/150' }
-];
-
-// Routes
-app.get('/', (req, res) => {
-    res.render('home', { title: 'Trang chủ - SHM', listings });
-});
-
-app.get('/product/:id', (req, res) => {
-    const item = listings.find(l => l.id == req.params.id);
-    res.render('product', { item });
-});
-
-app.get('/post-ad', (req, res) => {
-    res.render('post-ad', { categories });
-});
-
-app.post('/post-ad', (req, res) => {
-    // Xử lý lưu tin đăng [cite: 98]
-    const { title, price, categoryId, description } = req.body;
-    console.log("Đang kiểm duyệt tin:", title); // Business Rule: Chờ duyệt [cite: 185]
-    res.send('<h3>Tin đăng của bạn đang được kiểm duyệt! [cite: 238]</h3><a href="/">Về trang chủ</a>');
-});
-
-app.listen(3000, () => console.log('Server chạy tại http://localhost:3000'));
->>>>>>> 7ec05b6a5ccc8b019cca11c35ccd913321cfd47f

@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 <div class="p-4 p-md-5 mb-4 rounded text-center hero-banner shadow-sm" style="background-color: #f8f9fa;">
     <div class="col-md-8 mx-auto py-3">
         <h1 class="display-5 fw-bold text-primary mb-3">SÀN GIAO DỊCH SHM</h1>
@@ -18,7 +17,7 @@
         {{#each viewedItems}}
         <div class="col">
             <div class="card h-100 shadow-sm border-0 bg-light">
-                <img src="{{this.img}}" class="card-img-top product-img opacity-75" alt="{{this.title}}" style="height: 120px; object-fit: cover;">
+                <img src="{{this.img}}" class="card-img-top product-img opacity-75" alt="{{this.title}}" style="height: 120px; object-fit: cover;" onerror="this.src='https://via.placeholder.com/300x200?text=SHM+Marketplace'">
                 <div class="card-body p-2 d-flex flex-column">
                     <h6 class="card-title fs-6 mb-1 text-truncate">
                         <a href="/product/{{this.id}}" class="text-decoration-none text-dark stretched-link">{{this.title}}</a>
@@ -31,6 +30,7 @@
     </div>
     {{/if}}
 {{/if}}
+
 <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
     <h2 class="fw-bold m-0">🔥 Sản phẩm nổi bật</h2>
 </div>
@@ -59,17 +59,6 @@
     {{else}}
     <div class="col-12 text-center py-5">
         <p class="text-muted">Chưa có sản phẩm nào được đăng.</p>
-=======
-<h2>Sản phẩm gần đây </h2>
-<div class="product-grid">
-    {{#each listings}}
-    <div class="product-card">
-        <img src="{{this.img}}" alt="product">
-        <h3><a href="/product/{{this.id}}">{{this.title}}</a></h3>
-        <p class="price">{{this.price}} đ</p>
-        <p class="loc">{{this.location}}</p>
-        <p>Độ mới: {{this.condition}}%</p>
->>>>>>> 7ec05b6a5ccc8b019cca11c35ccd913321cfd47f
     </div>
     {{/each}}
 </div>
