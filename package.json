@@ -1,0 +1,28 @@
+{
+  "name": "shm-marketplace",
+  "version": "1.0.0",
+  "description": "Nền tảng thương mại điện tử C2C cho đồ cũ",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "keywords": [
+    "second-hand",
+    "marketplace",
+    "shm"
+  ],
+  "author": "Nguyễn Thế Anh",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
+    "express": "^5.2.1",
+    "express-handlebars": "^8.0.3",
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.20.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}

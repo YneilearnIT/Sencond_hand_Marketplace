@@ -1,0 +1,33 @@
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+                <h3 class="text-center mb-4 fw-bold text-primary">Đăng ký tài khoản</h3>
+                <form action="/register" method="POST">
+                    <div class="mb-3">
+                        <label for="fullname" class="form-label">Họ và tên</label>
+                        <input type="text" class="form-control" id="fullname" name="fullname" required placeholder="Nhập họ và tên">
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required placeholder="Nhập email của bạn">
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Mật khẩu</label>
+                        <input type="password" class="form-control" id="password" name="password" required placeholder="Tạo mật khẩu">
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirm_password" class="form-label">Xác nhận mật khẩu</label>
+                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" required placeholder="Nhập lại mật khẩu">
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-warning fw-bold text-dark">Đăng ký</button>
+                    </div>
+                </form>
+                <div class="text-center mt-3">
+                    <p class="mb-0">Đã có tài khoản? <a href="/login" class="text-decoration-none">Đăng nhập</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
