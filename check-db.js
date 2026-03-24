@@ -1,12 +1,15 @@
-const pool = require('./src/config/db'); // Đường dẫn đến file db.js của bạn
+const { sql, poolPromise } = require('./src/config/db');
 
-pool.query('SELECT NOW()', (err, res) => {
-    if (err) {
-        console.error('❌ KẾT NỐI THẤT BẠI:', err.message);
-        console.log('Hệ thống gợi ý: Kiểm tra lại Mật khẩu hoặc tên Database trong file db.js');
-    } else {
-        console.log('✅ KẾT NỐI THÀNH CÔNG!');
-        console.log('Thời gian hiện tại trong Database là:', res.rows[0].now);
+async function testConnection() {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request().query('SELECT GETDATE() AS now');
+        console.log('Thời gian hiện tại trong Database là:', result.recordset[0].now);
+        process.exit(0);
+    } catch (err) {
+        console.error('Hệ thống gợi ý: Kiểm tra lại tài khoản, mật khẩu hoặc tên Server trong file .env');
+        process.exit(1);
     }
-    pool.end(); // Đóng kết nối sau khi test
-});
+}
+
+testConnection();
