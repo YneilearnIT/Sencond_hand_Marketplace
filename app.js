@@ -4,7 +4,7 @@ const { engine } = require('express-handlebars');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const apiRoutes = require('./src/routes/api');
-const { sql, poolPromise } = require('./src/config/db'); // Cập nhật cách import db
+const { sql, poolPromise } = require('./src/config/db'); 
 
 const app = express();
 const PORT = 3000;
@@ -55,24 +55,90 @@ app.use('/api', apiRoutes);
 
 // --- CÁC ROUTE GIAO DIỆN ---
 
-// Trang chủ
+// Trang chủ (Tích hợp Tìm kiếm & Lọc theo Danh mục)
 app.get('/', async (req, res) => {
+    const { search, category } = req.query; // Lấy từ khóa và danh mục từ URL
+    
     try {
         const pool = await poolPromise;
-        // MSSQL dùng TOP thay vì LIMIT, dùng số 1 thay vì TRUE cho kiểu BIT
-        const query = `
-            SELECT TOP 8 l.listing_id AS id, l.title, l.price, l.condition_percentage AS condition, 
+        const request = pool.request();
+        
+        // 1. Lấy danh sách danh mục để hiển thị lên thanh Menu lọc
+        const catResult = await request.query('SELECT * FROM categories');
+
+        // 2. Xây dựng câu lệnh truy vấn sản phẩm động
+        let query = `
+            SELECT l.listing_id AS id, l.title, l.price, l.condition_percentage AS condition, 
                    l.location_gps AS location, i.image_url AS img
             FROM listings l
             LEFT JOIN listing_images i ON l.listing_id = i.listing_id AND i.is_thumbnail = 1
             WHERE l.status = 'Active'
-            ORDER BY l.is_vip DESC, l.created_at DESC
         `;
-        const result = await pool.request().query(query);
-        res.render('home', { listings: result.recordset }); // MSSQL trả về recordset thay vì rows
+
+        // Nếu người dùng có gõ tìm kiếm
+        if (search) {
+            query += ` AND l.title LIKE @search`;
+            request.input('search', sql.NVarChar, `%${search}%`);
+        }
+
+        // Nếu người dùng có bấm chọn 1 danh mục
+        if (category) {
+            query += ` AND l.category_id = @category`;
+            request.input('category', sql.Int, category);
+        }
+
+        // Sắp xếp ưu tiên tin VIP và tin mới nhất
+        query += ` ORDER BY l.is_vip DESC, l.created_at DESC`;
+
+        const result = await request.query(query);
+        
+        res.render('home', { 
+            listings: result.recordset, 
+            categories: catResult.recordset,
+            searchKeyword: search // Giữ lại từ khóa trên ô tìm kiếm
+        }); 
     } catch (err) {
         console.error("Lỗi tải trang chủ:", err);
-        res.render('home', { listings: [] });
+        res.render('home', { listings: [], categories: [] });
+    }
+});
+
+// Xem Chi tiết Sản phẩm
+app.get('/product/:id', async (req, res) => {
+    const { id } = req.params;
+    
+    try {
+        const pool = await poolPromise;
+        
+        // 1. Lấy thông tin chi tiết sản phẩm + Tên người bán
+        const productQuery = `
+            SELECT l.*, c.category_name, u.full_name AS seller_name, u.reputation_score
+            FROM listings l
+            JOIN categories c ON l.category_id = c.category_id
+            JOIN users u ON l.seller_id = u.user_id
+            WHERE l.listing_id = @id AND l.status = 'Active'
+        `;
+        const productResult = await pool.request()
+            .input('id', sql.Int, id)
+            .query(productQuery);
+
+        if (productResult.recordset.length === 0) {
+            return res.status(404).send('Sản phẩm không tồn tại hoặc đã bị ẩn/bán.');
+        }
+
+        // 2. Lấy tất cả hình ảnh của sản phẩm này
+        const imageQuery = `SELECT image_url, is_thumbnail FROM listing_images WHERE listing_id = @id`;
+        const imageResult = await pool.request()
+            .input('id', sql.Int, id)
+            .query(imageQuery);
+
+        res.render('product', { 
+            product: productResult.recordset[0],
+            images: imageResult.recordset
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Lỗi máy chủ khi tải chi tiết sản phẩm.');
     }
 });
 
@@ -104,9 +170,19 @@ app.get('/register', (req, res) => res.render('register'));
 app.post('/register', async (req, res) => {
     const { fullname, phone_number, email, password } = req.body;
     try {
-        await pool.query('INSERT INTO users (full_name, phone_number, email, password_hash) VALUES ($1, $2, $3, $4)', [fullname, phone, email, password]);
+        const pool = await poolPromise;
+        await pool.request()
+            .input('fullname', sql.NVarChar, fullname)
+            .input('phone', sql.VarChar, phone_number)
+            .input('email', sql.VarChar, email)
+            .input('password', sql.VarChar, password)
+            .query('INSERT INTO users (full_name, phone_number, email, password_hash) VALUES (@fullname, @phone, @email, @password)');
+            
         res.send(`<script>alert('Đăng ký thành công!'); window.location.href = '/login';</script>`);
-    } catch (err) { res.send(`<script>alert('Lỗi: ${err.message}'); window.location.href = '/register';</script>`); }
+    } catch (err) { 
+        console.error(err);
+        res.send(`<script>alert('Lỗi: ${err.message}'); window.location.href = '/register';</script>`); 
+    }
 });
 
 // Đăng xuất
@@ -129,19 +205,34 @@ app.get('/post-ad', checkLogin, async (req, res) => {
 // Xử lý Đăng tin
 app.post('/post-ad', checkLogin, async (req, res) => {
     const { title, category_id, price, condition, location, description, image_url } = req.body;
-    const seller_id = req.session.user.user_id; // Lấy ID từ session thật
+    const seller_id = req.session.user.user_id; 
 
     try {
-        const listingResult = await pool.query(
-            `INSERT INTO listings (seller_id, category_id, title, description, price, condition_percentage, location_gps, status) 
-             VALUES ($1, $2, $3, $4, $5, $6, $7, 'Active') RETURNING listing_id`,
-            [seller_id, category_id, title, description, price, condition, location]
-        );
-        const newListingId = listingResult.rows[0].listing_id;
-        await pool.query(
-            `INSERT INTO listing_images (listing_id, image_url, is_thumbnail) VALUES ($1, $2, TRUE)`,
-            [newListingId, image_url || 'https://via.placeholder.com/300']
-        );
+        const pool = await poolPromise;
+        
+        const listingQuery = `
+            INSERT INTO listings (seller_id, category_id, title, description, price, condition_percentage, location_gps, status) 
+            OUTPUT INSERTED.listing_id
+            VALUES (@seller_id, @category_id, @title, @description, @price, @condition, @location, 'Active')
+        `;
+        
+        const listingResult = await pool.request()
+            .input('seller_id', sql.Int, seller_id)
+            .input('category_id', sql.Int, category_id)
+            .input('title', sql.NVarChar, title)
+            .input('description', sql.NVarChar, description)
+            .input('price', sql.Decimal(18,2), price)
+            .input('condition', sql.Int, condition)
+            .input('location', sql.NVarChar, location)
+            .query(listingQuery);
+            
+        const newListingId = listingResult.recordset[0].listing_id;
+        
+        await pool.request()
+            .input('listing_id', sql.Int, newListingId)
+            .input('image_url', sql.VarChar, image_url || 'https://via.placeholder.com/300')
+            .query('INSERT INTO listing_images (listing_id, image_url, is_thumbnail) VALUES (@listing_id, @image_url, 1)');
+            
         res.send(`<script>alert('Đăng tin thành công!'); window.location.href = '/';</script>`);
     } catch (err) { 
         console.error(err);
