@@ -17,10 +17,10 @@ app.use(session({
     cookie: { secure: false } 
 }));
 
-// 2. Middleware kiểm tra đăng nhập (Bảo vệ Route)
+// 2. Middleware kiểm tra đăng nhập
 const checkLogin = (req, res, next) => {
     if (req.session.user) {
-        next(); // Đã đăng nhập, cho phép đi tiếp
+        next();
     } else {
         res.send(`
             <script>
@@ -102,20 +102,11 @@ app.post('/login', async (req, res) => {
 // Đăng ký
 app.get('/register', (req, res) => res.render('register'));
 app.post('/register', async (req, res) => {
-    const { fullname, phone, email, password } = req.body;
+    const { fullname, phone_number, email, password } = req.body;
     try {
-        const pool = await poolPromise;
-        await pool.request()
-            .input('fullname', sql.NVarChar, fullname)
-            .input('phone', sql.VarChar, phone)
-            .input('email', sql.VarChar, email)
-            .input('password', sql.VarChar, password)
-            .query('INSERT INTO users (full_name, phone_number, email, password_hash) VALUES (@fullname, @phone, @email, @password)');
-            
+        await pool.query('INSERT INTO users (full_name, phone_number, email, password_hash) VALUES ($1, $2, $3, $4)', [fullname, phone, email, password]);
         res.send(`<script>alert('Đăng ký thành công!'); window.location.href = '/login';</script>`);
-    } catch (err) { 
-        res.send(`<script>alert('Lỗi: ${err.message}'); window.location.href = '/register';</script>`); 
-    }
+    } catch (err) { res.send(`<script>alert('Lỗi: ${err.message}'); window.location.href = '/register';</script>`); }
 });
 
 // Đăng xuất
@@ -124,7 +115,7 @@ app.get('/logout', (req, res) => {
     res.redirect('/');
 });
 
-// Đăng tin (ĐÃ ĐƯỢC BẢO VỆ BỞI checkLogin)
+// Giao diện Đăng tin
 app.get('/post-ad', checkLogin, async (req, res) => {
     try {
         const pool = await poolPromise;
@@ -135,37 +126,22 @@ app.get('/post-ad', checkLogin, async (req, res) => {
     }
 });
 
+// Xử lý Đăng tin
 app.post('/post-ad', checkLogin, async (req, res) => {
     const { title, category_id, price, condition, location, description, image_url } = req.body;
-    const seller_id = req.session.user.user_id; 
+    const seller_id = req.session.user.user_id; // Lấy ID từ session thật
 
     try {
-        const pool = await poolPromise;
-        
-        // MSSQL dùng OUTPUT INSERTED.id thay vì RETURNING id
-        const listingQuery = `
-            INSERT INTO listings (seller_id, category_id, title, description, price, condition_percentage, location_gps, status) 
-            OUTPUT INSERTED.listing_id
-            VALUES (@seller_id, @category_id, @title, @description, @price, @condition, @location, 'Active')
-        `;
-        
-        const listingResult = await pool.request()
-            .input('seller_id', sql.Int, seller_id)
-            .input('category_id', sql.Int, category_id)
-            .input('title', sql.NVarChar, title)
-            .input('description', sql.NVarChar, description)
-            .input('price', sql.Decimal(18,2), price)
-            .input('condition', sql.Int, condition)
-            .input('location', sql.NVarChar, location)
-            .query(listingQuery);
-            
-        const newListingId = listingResult.recordset[0].listing_id;
-        
-        await pool.request()
-            .input('listing_id', sql.Int, newListingId)
-            .input('image_url', sql.VarChar, image_url || 'https://via.placeholder.com/300')
-            .query('INSERT INTO listing_images (listing_id, image_url, is_thumbnail) VALUES (@listing_id, @image_url, 1)');
-            
+        const listingResult = await pool.query(
+            `INSERT INTO listings (seller_id, category_id, title, description, price, condition_percentage, location_gps, status) 
+             VALUES ($1, $2, $3, $4, $5, $6, $7, 'Active') RETURNING listing_id`,
+            [seller_id, category_id, title, description, price, condition, location]
+        );
+        const newListingId = listingResult.rows[0].listing_id;
+        await pool.query(
+            `INSERT INTO listing_images (listing_id, image_url, is_thumbnail) VALUES ($1, $2, TRUE)`,
+            [newListingId, image_url || 'https://via.placeholder.com/300']
+        );
         res.send(`<script>alert('Đăng tin thành công!'); window.location.href = '/';</script>`);
     } catch (err) { 
         console.error(err);
