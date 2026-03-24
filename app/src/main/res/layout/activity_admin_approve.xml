@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F8F9FA">
+
+    <!-- 1. HEADER XANH CỐ ĐỊNH -->
+    <RelativeLayout
+        android:id="@+id/headerAdmin"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:background="#64B5F6"
+        android:elevation="4dp">
+
+        <ImageButton
+            android:id="@+id/btnBackAdmin"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="4dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/ic_menu_revert"
+            app:tint="#FFFFFF" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="Hồ sơ cần duyệt"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+    </RelativeLayout>
+
+    <!-- 2. THANH CHỌN TAB (Duyệt tin / Báo cáo) -->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabLayoutAdmin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        app:tabIndicatorColor="#64B5F6"
+        app:tabIndicatorHeight="3dp"
+        app:tabSelectedTextColor="#64B5F6"
+        app:tabTextColor="#757575"
+        app:tabMode="fixed"
+        app:tabGravity="fill"
+        android:elevation="2dp"/>
+
+    <!-- 3. VÙNG HIỂN THỊ FRAGMENT (ViewPager2) -->
+    <!-- Đây là nơi 2 cái Fragment của bạn sẽ nhảy vào nằm -->
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewPagerAdmin"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+</LinearLayout>
