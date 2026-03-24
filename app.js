@@ -55,12 +55,16 @@ app.use('/api', apiRoutes);
 
 // --- CÁC ROUTE GIAO DIỆN ---
 
-// Trang chủ
+// Trang chủ - ĐÃ SỬA QUERY ĐỂ HIỆN ẢNH
 app.get('/', async (req, res) => {
     try {
         const query = `
             SELECT l.listing_id AS id, l.title, l.price, l.condition_percentage AS condition, 
-                   l.location_gps AS location, i.image_url AS img
+                   l.location_gps AS location, 
+                   CASE 
+                       WHEN i.image_url LIKE 'http%' THEN i.image_url 
+                       ELSE '/images/' || i.image_url 
+                   END AS img
             FROM listings l
             LEFT JOIN listing_images i ON l.listing_id = i.listing_id AND i.is_thumbnail = TRUE
             WHERE l.status = 'Active'
@@ -126,7 +130,6 @@ app.post('/post-ad', checkLogin, async (req, res) => {
     const seller_id = req.session.user.user_id;
 
     try {
-        // 1. Thêm tin đăng
         const listingResult = await pool.query(
             `INSERT INTO listings (seller_id, category_id, title, description, price, condition_percentage, location_gps, status) 
              VALUES ($1, $2, $3, $4, $5, $6, $7, 'Active') RETURNING listing_id`,
@@ -135,10 +138,9 @@ app.post('/post-ad', checkLogin, async (req, res) => {
 
         const newListingId = listingResult.rows[0].listing_id;
 
-        // 2. Thêm ảnh đại diện
         await pool.query(
             `INSERT INTO listing_images (listing_id, image_url, is_thumbnail) VALUES ($1, $2, TRUE)`,
-            [newListingId, image_url || 'https://via.placeholder.com/300']
+            [newListingId, image_url || 'default.jpg']
         );
 
         res.send(`<script>alert('Đăng tin thành công!'); window.location.href = '/';</script>`);
