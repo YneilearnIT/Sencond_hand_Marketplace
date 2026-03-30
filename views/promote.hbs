@@ -1,0 +1,98 @@
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow-lg border-0 rounded-4 p-4 text-center">
+                <div class="mb-3 text-primary display-4"><i class="fas fa-rocket"></i></div>
+                <h3 class="fw-bold mb-1">Nâng Cấp VIP</h3>
+                <p class="text-secondary small mb-4">Sản phẩm: <strong>{{product.title}}</strong> (ID: {{product.listing_id}})</p>
+
+                <div class="bg-light p-3 rounded-4 mb-4 border border-dashed">
+                    <img src="{{qrUrl}}" class="img-fluid rounded-3 shadow-sm border border-white mb-3" style="max-height: 380px;">
+                    <div class="mt-2">
+                        <h4 class="text-danger fw-bold mb-0">{{amount}} đ</h4>
+                        <p class="small text-muted mt-2">Nội dung chuyển khoản:</p>
+                        <span class="badge bg-dark px-3 py-2 fs-6">{{description}}</span>
+                    </div>
+                </div>
+
+                <div class="alert alert-info py-3 small mb-4 text-start shadow-sm border-0" style="background-color: #e3f2fd;">
+    <div class="d-flex align-items-center">
+        <i class="fas fa-user-check me-2 fs-5 text-primary"></i>
+        <div>
+            <span class="fw-bold d-block text-primary">Thông báo kiểm duyệt:</span>
+            Sau khi bấm xác nhận, <strong>Quản trị viên</strong> sẽ kiểm tra lịch sử giao dịch và kích hoạt VIP cho bạn trong thời gian sớm nhất.
+        </div>
+    </div>
+</div>
+
+<button onclick="confirmPayment()" class="btn btn-primary btn-lg w-100 fw-bold rounded-pill shadow-sm py-3 mb-2">
+    TÔI ĐÃ CHUYỂN KHOẢN THÀNH CÔNG
+</button>
+
+                <button onclick="confirmAutoPayment()" class="btn btn-primary btn-lg w-100 fw-bold rounded-pill shadow">
+                    XÁC NHẬN ĐÃ CHUYỂN KHOẢN
+                </button>
+                <a href="/my-listings" class="btn btn-link text-muted small mt-2">Quay lại</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function confirmAutoPayment() {
+    Swal.fire({
+        title: 'Đang quét giao dịch...',
+        text: 'Hệ thống đang kết nối ngân hàng để xác thực số dư.',
+        allowOutsideClick: false,
+        didOpen: () => { Swal.showLoading(); }
+    });
+
+    setTimeout(async () => {
+        const res = await fetch('/promote/activate', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ listing_id: '{{product.listing_id}}' })
+        });
+        const data = await res.json();
+        if (data.success) {
+            Swal.fire({ title: 'Thành công!', text: 'Đã nhận được 2.000đ. Tin đã lên VIP!', icon: 'success' })
+            .then(() => window.location.href = '/');
+        } else {
+            Swal.fire('Lỗi', 'Xác thực thất bại!', 'error');
+        }
+    }, 3000);
+}
+</script>
+<script>
+async function confirmPayment() {
+    // Hiện loading nhẹ
+    Swal.fire({
+        title: 'Đang gửi yêu cầu...',
+        didOpen: () => { Swal.showLoading(); }
+    });
+
+    try {
+        const res = await fetch('/promote/activate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ listing_id: '{{product.listing_id}}' })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            Swal.fire({
+                title: 'Yêu cầu đã được gửi!',
+                text: 'Hệ thống đang chờ Admin xác nhận số dư. Vui lòng kiểm tra lại tin đăng sau ít phút!',
+                icon: 'success',
+                confirmButtonColor: '#0d6efd'
+            }).then(() => {
+                window.location.href = '/my-listings';
+            });
+        } else {
+            Swal.fire('Lỗi', 'Không thể gửi yêu cầu lúc này!', 'error');
+        }
+    } catch (err) {
+        Swal.fire('Lỗi', 'Mất kết nối với máy chủ!', 'error');
+    }
+}
+</script>

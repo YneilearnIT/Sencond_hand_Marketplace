@@ -1,46 +1,46 @@
-<div class="container mt-5">
-    <h2 class="fw-bold mb-4">Giỏ hàng của bạn</h2>
+<div class="container mt-5 mb-5">
+    <div class="d-flex align-items-center mb-4">
+        <i class="fas fa-shopping-cart fa-2x text-primary me-3"></i>
+        <h2 class="fw-bold mb-0">Giỏ hàng của tôi</h2>
+    </div>
 
     <div class="row">
         <div class="col-lg-8">
-            <div class="card shadow-sm border-0 mb-4">
-                <div class="card-body p-0">
+            {{#if cartItems.length}}
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
                     <div class="table-responsive">
                         <table class="table table-hover align-middle mb-0">
                             <thead class="bg-light">
                                 <tr>
-                                    <th scope="col" class="ps-4">Sản phẩm</th>
-                                    <th scope="col">Giá tiền</th>
-                                    <th scope="col" class="text-center">Thao tác</th>
+                                    <th class="ps-4 py-3">Sản phẩm</th>
+                                    <th class="py-3">Giá bán</th>
+                                    <th class="py-3 text-center">Hành động</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {{#each cartItems}}
-                                <tr>
+                                <tr id="row-{{this.listing_id}}">
                                     <td class="ps-4 py-3">
                                         <div class="d-flex align-items-center">
-                                            <img src="{{this.img}}" class="rounded me-3" alt="product" style="width: 60px; height: 60px; object-fit: cover;">
+                                            <img src="{{this.img}}" class="rounded-3 border me-3 shadow-sm" 
+                                                 style="width: 80px; height: 80px; object-fit: cover;"
+                                                 onerror="this.src='/images/default.jpg'">
                                             <div>
-                                                <h6 class="mb-0 text-dark">{{this.title}}</h6>
+                                                <h6 class="fw-bold mb-1 text-truncate" style="max-width: 250px;">
+                                                    <a href="/product/{{this.listing_id}}" class="text-decoration-none text-dark">{{this.title}}</a>
+                                                </h6>
+                                                <small class="text-muted"><i class="fas fa-tag me-1"></i> ID: #{{this.listing_id}}</small>
                                             </div>
                                         </div>
                                     </td>
-                                    <td>
-                                        <span class="text-danger fw-bold">{{this.price}} đ</span>
+                                    <td class="py-3">
+                                        <span class="text-danger fw-bold fs-5">{{this.price}} đ</span>
                                     </td>
-                                    <td class="text-center">
-                                        <form action="/cart/remove" method="POST">
-                                            <input type="hidden" name="listing_id" value="{{this.id}}">
-                                            <button type="submit" class="btn btn-sm btn-outline-danger">Xóa</button>
-                                        </form>
-                                    </td>
-                                </tr>
-                                {{else}}
-                                <tr>
-                                    <td colspan="3" class="text-center py-5">
-                                        <img src="https://cdn-icons-png.flaticon.com/512/11329/11329060.png" width="100" class="mb-3 opacity-50">
-                                        <h5 class="text-muted">Giỏ hàng đang trống</h5>
-                                        <a href="/" class="btn btn-primary mt-2">Quay lại mua sắm</a>
+                                    <td class="py-3 text-center">
+                                        <button type="button" onclick="removeFromCart('{{this.listing_id}}')" 
+                                                class="btn btn-outline-danger btn-sm rounded-pill px-3 shadow-sm">
+                                            <i class="fas fa-trash-alt me-1"></i> Xóa
+                                        </button>
                                     </td>
                                 </tr>
                                 {{/each}}
@@ -48,34 +48,95 @@
                         </table>
                     </div>
                 </div>
-            </div>
+            {{else}}
+                <div class="text-center py-5 bg-white rounded-4 shadow-sm border">
+                    <img src="https://cdn-icons-png.flaticon.com/512/11329/11329060.png" alt="Empty Cart" style="width: 150px;" class="mb-4 opacity-50">
+                    <h4 class="text-muted">Giỏ hàng của bạn đang trống</h4>
+                    <p class="text-muted mb-4">Hãy dạo quanh một vòng và chọn vài món đồ ưng ý nhé!</p>
+                    <a href="/" class="btn btn-primary px-5 fw-bold rounded-pill shadow-sm">MUA SẮM NGAY</a>
+                </div>
+            {{/if}}
         </div>
 
-        {{#if cartItems.length}}
         <div class="col-lg-4">
-            <div class="card shadow-sm border-0">
-                <div class="card-body p-4">
-                    <h5 class="fw-bold mb-3">Tóm tắt đơn hàng</h5>
-                    <div class="d-flex justify-content-between mb-3 text-muted">
-                        <span>Số lượng sản phẩm:</span>
-                        <span>{{cartItems.length}} món</span>
-                    </div>
-                    <hr>
-                  
-    Chốt đơn ngay
-<button class="btn btn-warning w-100 fw-bold py-3 mt-3 fs-5" 
-    onclick="Swal.fire({
-        title: 'Sắp ra mắt!',
-        text: 'Tính năng thanh toán đang được phát triển. Bạn quay lại sau nhé!',
-        icon: 'info',
-        confirmButtonText: 'Đã hiểu',
-        confirmButtonColor: '#0d6efd'
-    })">
-    <i class="fas fa-money-check-alt me-2"></i> Chốt đơn ngay
-</button>
+            <div class="card border-0 shadow-sm rounded-4 p-4 sticky-top" style="top: 100px;">
+                <h5 class="fw-bold mb-4 border-bottom pb-2">Tạm tính</h5>
+                <div class="d-flex justify-content-between mb-3">
+                    <span class="text-muted">Số lượng sản phẩm:</span>
+                    <span class="fw-bold">{{cartItems.length}} món</span>
                 </div>
+                <div class="d-flex justify-content-between mb-4">
+                    <span class="text-muted">Phí dịch vụ SHM:</span>
+                    <span class="text-success fw-bold">Miễn phí</span>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <span class="fs-5 fw-bold">Tổng cộng:</span>
+                    <span class="fs-4 text-danger fw-bold" id="totalPrice">--- đ</span>
+                </div>
+                
+                <button class="btn btn-dark btn-lg w-100 fw-bold py-3 rounded-pill shadow-sm mb-3" 
+                        onclick="Swal.fire('Tính năng đang phát triển', 'Chức năng thanh toán hàng loạt sẽ sớm ra mắt!', 'info')">
+                    TIẾP TỤC THANH TOÁN
+                </button>
+                <a href="/" class="btn btn-outline-secondary w-100 fw-bold py-2 rounded-pill border-2">Tiếp tục mua sắm</a>
             </div>
         </div>
-        {{/if}}
     </div>
 </div>
+
+<script>
+// Hàm xử lý Xóa khỏi giỏ hàng (Đồng bộ với SQL Server)
+async function removeFromCart(id) {
+    const result = await Swal.fire({
+        title: 'Bỏ sản phẩm này?',
+        text: "Món đồ này sẽ biến mất khỏi giỏ hàng của bạn.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Đồng ý xóa',
+        cancelButtonText: 'Hủy'
+    });
+
+    if (result.isConfirmed) {
+        try {
+            // Gửi yêu cầu AJAX lên Backend
+            const res = await fetch('/cart/remove', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ listing_id: id })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                await Swal.fire({
+                    title: 'Đã xóa!',
+                    text: 'Giỏ hàng đã được cập nhật.',
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+                location.reload(); // Reload để cập nhật UI
+            } else {
+                Swal.fire('Lỗi', 'Không thể xóa sản phẩm!', 'error');
+            }
+        } catch (err) {
+            Swal.fire('Lỗi', 'Kết nối server thất bại!', 'error');
+        }
+    }
+}
+
+// Hàm tính tổng giá tiền (Tạm tính đơn giản)
+window.onload = () => {
+    let total = 0;
+    // Lấy tất cả các giá trị giá bán trong bảng và cộng dồn
+    document.querySelectorAll('.text-danger.fs-5').forEach(el => {
+        let price = el.innerText.replace(/[^0-9]/g, '');
+        total += parseInt(price);
+    });
+    if (total > 0) {
+        document.getElementById('totalPrice').innerText = new Intl.NumberFormat('en-US').format(total) + ' đ';
+    }
+};
+</script>

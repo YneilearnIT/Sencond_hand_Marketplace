@@ -33,6 +33,11 @@
 
 <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
     <h2 class="fw-bold m-0">🔥 Sản phẩm nổi bật</h2>
+    {{#if is_vip}}
+    <span class="badge bg-warning text-dark px-3 py-2 ms-2 rounded-pill shadow-sm animate__animated animate__heartBeat animate__infinite">
+        <i class="fas fa-crown me-1 text-danger"></i> VIP
+    </span>
+{{/if}}
 </div>
 
 <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3 g-md-4">

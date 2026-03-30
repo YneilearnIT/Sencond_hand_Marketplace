@@ -6,272 +6,264 @@ const session = require('express-session');
 const { sql, poolPromise } = require('./src/config/db');
 const multer = require('multer');
 const fs = require('fs');
+const cors = require('cors');
 
 const app = express();
 const PORT = 3000;
 
-// Tạo thư mục lưu ảnh
+// --- CẤU HÌNH ---
+app.use(cors());
 const uploadDir = path.join(__dirname, 'public/images');
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
 const storage = multer.diskStorage({
-    destination: function (req, file, cb) { cb(null, uploadDir); },
-    filename: function (req, file, cb) {
+    destination: (req, file, cb) => cb(null, uploadDir),
+    filename: (req, file, cb) => {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
         cb(null, 'shm-' + uniqueSuffix + path.extname(file.originalname));
     }
 });
-const upload = multer({ storage: storage });
+const upload = multer({ storage });
 
+// --- HELPERS ---
 const showPopup = (res, title, text, icon, redirectUrl) => {
     const action = redirectUrl === 'back' ? 'window.history.back();' : `window.location.href = '${redirectUrl}';`;
-    res.send(`
-        <!DOCTYPE html>
-        <html><head>
-            <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-            <style>body { background-color: #f8f9fa; font-family: sans-serif; }</style>
-        </head><body><script>
-            Swal.fire({ title: '${title}', text: '${text}', icon: '${icon}', confirmButtonColor: '#0d6efd', confirmButtonText: 'OK', allowOutsideClick: false })
-            .then(() => { ${action} });
-        </script></body></html>
-    `);
+    res.send(`<!DOCTYPE html><html><head><meta charset="UTF-8"><script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script></head><body><script>Swal.fire({title:'${title}',text:'${text}',icon:'${icon}',confirmButtonColor:'#0d6efd'}).then(()=>{${action}});</script></body></html>`);
 };
+const formatPrice = (p) => new Intl.NumberFormat('en-US').format(p);
 
-const formatPrice = (price) => new Intl.NumberFormat('en-US').format(price);
-
-app.use(session({ secret: 'shm_secret_key_2026', resave: false, saveUninitialized: true, cookie: { secure: false } }));
-
-// Middleware kiểm tra đăng nhập
-const checkLogin = (req, res, next) => {
-    if (req.session.user) next();
-    else showPopup(res, 'Cảnh báo!', 'Bạn cần đăng nhập để sử dụng tính năng này!', 'warning', '/login');
-};
-
-// Middleware kiểm tra quyền ADMIN
-const checkAdmin = (req, res, next) => {
-    if (req.session.user && req.session.user.role === 'admin') next();
-    else showPopup(res, 'Cấm truy cập!', 'Bạn không có quyền vào khu vực của Admin!', 'error', '/');
-};
-
-app.use((req, res, next) => {
-    res.locals.user = req.session.user || null;
-    res.locals.isAdmin = req.session.user && req.session.user.role === 'admin'; // Truyền biến isAdmin ra giao diện
-    if (!req.session.cart) req.session.cart = [];
-    if (!req.session.recentlyViewed) req.session.recentlyViewed = [];
-    res.locals.cartItemCount = req.session.cart.length; 
-    next();
-});
-
-// Cấu hình Handlebars có thêm Helper để so sánh
-app.engine('hbs', engine({ 
-    extname: '.hbs', defaultLayout: 'main', layoutsDir: path.join(__dirname, 'views/layouts'),
-    helpers: { eq: (a, b) => a === b } 
-}));
-app.set('view engine', 'hbs');
-app.set('views', path.join(__dirname, 'views'));
+// --- MIDDLEWARE ---
+app.use(session({ secret: 'shm_secret_2026', resave: false, saveUninitialized: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ==========================================
-// TÍNH NĂNG ADMIN DASHBOARD (LỌC + XÓA BÀI)
-// ==========================================
-app.get('/admin', checkAdmin, async (req, res) => {
+app.use(async (req, res, next) => {
+    res.locals.user = req.session.user || null;
+    res.locals.isAdmin = req.session.user && req.session.user.role === 'admin';
+    
     try {
         const pool = await poolPromise;
-        const usersCount = await pool.request().query("SELECT COUNT(*) as count FROM users");
-        const listingsCount = await pool.request().query("SELECT COUNT(*) as count FROM listings WHERE status = 'Active'");
+        // 1. Lấy danh mục cho Header
+        const catRes = await pool.request().query("SELECT * FROM categories ORDER BY category_name ASC");
+        res.locals.globalCategories = catRes.recordset;
 
-        const categoriesResult = await pool.request().query("SELECT * FROM categories");
-        
-        const searchQuery = req.query.search || '';
-        const categoryQuery = req.query.category ? parseInt(req.query.category) : '';
-        const hasFilter = searchQuery !== '' || categoryQuery !== '';
-
-        let queryListings = `
-            SELECT l.listing_id AS id, l.title, l.price, u.full_name AS seller_name, l.status, c.category_name
-            FROM listings l
-            LEFT JOIN users u ON l.seller_id = u.user_id
-            LEFT JOIN categories c ON l.category_id = c.category_id
-            WHERE 1=1
-        `;
-        
-        const request = pool.request();
-        
-        if (searchQuery.trim() !== '') {
-            queryListings += ` AND l.title LIKE @search `;
-            request.input('search', sql.NVarChar, `%${searchQuery}%`);
-        }
-        
-        if (categoryQuery !== '') {
-            queryListings += ` AND l.category_id = @category `;
-            request.input('category', sql.Int, categoryQuery);
-        }
-        
-        queryListings += ` ORDER BY l.created_at DESC `;
-        
-        const allListings = await request.query(queryListings);
-        const formattedListings = allListings.recordset.map(item => ({ ...item, price: formatPrice(item.price) }));
-
-        res.render('admin-dashboard', { 
-            totalUsers: usersCount.recordset[0].count,
-            totalListings: listingsCount.recordset[0].count,
-            allListings: formattedListings,
-            categories: categoriesResult.recordset,
-            searchQuery: searchQuery,
-            categoryQuery: categoryQuery,
-            hasFilter: hasFilter
-        });
-    } catch (err) { res.status(500).send("Lỗi tải trang Admin"); }
-});
-
-// CHÍNH LÀ HÀM NÀY NÈ: Dùng để xử lý khi Admin bấm nút Xóa vi phạm
-app.post('/admin/delete-listing', checkAdmin, async (req, res) => {
-    try {
-        const pool = await poolPromise;
-        await pool.request()
-            .input('id', sql.Int, req.body.listing_id)
-            .query("UPDATE listings SET status = 'Deleted' WHERE listing_id = @id");
-        res.json({ success: true });
-    } catch (err) { 
-        console.error(err);
-        res.json({ success: false, message: 'Lỗi khi xóa sản phẩm!' }); 
-    }
-});
-
-// --- ROUTE TRANG CHỦ & CHI TIẾT ---
-app.get('/', async (req, res) => {
-    try {
-        const pool = await poolPromise;
-        const queryAll = `SELECT l.listing_id AS id, l.title, l.price, l.condition_percentage AS condition, l.location_gps AS location, CASE WHEN i.image_url LIKE 'http%' THEN i.image_url ELSE '/images/' + ISNULL(i.image_url, 'default.jpg') END AS img FROM listings l LEFT JOIN listing_images i ON l.listing_id = i.listing_id AND i.is_thumbnail = 1 WHERE l.status = 'Active' ORDER BY l.is_vip DESC, l.created_at DESC`;
-        const resultAll = await pool.request().query(queryAll);
-        const listings = resultAll.recordset.map(item => ({ ...item, price: formatPrice(item.price) }));
-
-        let viewedItems = [];
-        if (req.session.user && req.session.recentlyViewed.length > 0) {
-            const validIds = req.session.recentlyViewed.map(id => parseInt(id)).filter(id => !isNaN(id));
-            if (validIds.length > 0) {
-                const queryViewed = `SELECT l.listing_id AS id, l.title, l.price, l.condition_percentage AS condition, l.location_gps AS location, CASE WHEN i.image_url LIKE 'http%' THEN i.image_url ELSE '/images/' + ISNULL(i.image_url, 'default.jpg') END AS img FROM listings l LEFT JOIN listing_images i ON l.listing_id = i.listing_id AND i.is_thumbnail = 1 WHERE l.listing_id IN (${validIds.join(',')}) AND l.status = 'Active'`;
-                const resultViewed = await pool.request().query(queryViewed);
-                let rawViewed = validIds.map(id => resultViewed.recordset.find(item => item.id === id)).filter(item => item !== undefined);
-                viewedItems = rawViewed.map(item => ({ ...item, price: formatPrice(item.price) }));
-            }
-        }
-        res.render('home', { listings, viewedItems });
-    } catch (err) { res.render('home', { listings: [], viewedItems: [] }); }
-});
-
-app.get('/product/:id', async (req, res) => {
-    const productId = req.params.id;
-    if (req.session.user) {
-        req.session.recentlyViewed = req.session.recentlyViewed.filter(id => id !== productId);
-        req.session.recentlyViewed.unshift(productId);
-        if (req.session.recentlyViewed.length > 4) req.session.recentlyViewed.pop();
-    }
-    try {
-        const pool = await poolPromise;
-        const query = `SELECT l.listing_id AS id, l.title, l.price, l.condition_percentage AS condition, l.location_gps AS location, l.description, u.full_name AS seller_name, CASE WHEN i.image_url LIKE 'http%' THEN i.image_url ELSE '/images/' + ISNULL(i.image_url, 'default.jpg') END AS img FROM listings l LEFT JOIN users u ON l.seller_id = u.user_id LEFT JOIN listing_images i ON l.listing_id = i.listing_id AND i.is_thumbnail = 1 WHERE l.listing_id = @id AND l.status = 'Active'`;
-        const result = await pool.request().input('id', sql.Int, productId).query(query);
-        if (result.recordset.length > 0) {
-            let product = result.recordset[0];
-            product.price = formatPrice(product.price); 
-            res.render('product-detail', { product });
+        // 2. Lấy số lượng giỏ hàng TỪ DATABASE (Thay vì session)
+        if (req.session.user) {
+            const cartCount = await pool.request()
+                .input('uid', sql.Int, req.session.user.user_id)
+                .query("SELECT COUNT(*) as total FROM cart WHERE user_id = @uid");
+            res.locals.cartItemCount = cartCount.recordset[0].total;
         } else {
-            res.status(404).send('Không tìm thấy sản phẩm hoặc đã bị gỡ.');
+            res.locals.cartItemCount = 0;
         }
-    } catch (err) { res.status(500).send('Lỗi máy chủ'); }
+    } catch (err) { 
+        res.locals.globalCategories = []; 
+        res.locals.cartItemCount = 0;
+    }
+    next();
 });
 
-// --- ROUTE QUẢN LÝ TIN ĐĂNG CỦA TÔI ---
-app.get('/my-listings', checkLogin, async (req, res) => {
-    try {
-        const pool = await poolPromise;
-        const query = `SELECT l.listing_id AS id, l.title, l.price, CASE WHEN i.image_url LIKE 'http%' THEN i.image_url ELSE '/images/' + ISNULL(i.image_url, 'default.jpg') END AS img FROM listings l LEFT JOIN listing_images i ON l.listing_id = i.listing_id AND i.is_thumbnail = 1 WHERE l.seller_id = @seller_id AND l.status != 'Deleted' ORDER BY l.created_at DESC`;
-        const result = await pool.request().input('seller_id', sql.Int, req.session.user.user_id).query(query);
-        const myListings = result.recordset.map(item => ({ ...item, price: formatPrice(item.price) }));
-        res.render('my-listings', { myListings });
-    } catch (err) { res.status(500).send("Lỗi tải danh sách tin đăng."); }
-});
+const checkAdmin = (req, res, next) => (req.session.user && req.session.user.role === 'admin') ? next() : res.redirect('/');
+const checkLogin = (req, res, next) => req.session.user ? next() : res.redirect('/login');
 
-app.post('/my-listings/delete', checkLogin, async (req, res) => {
-    try {
-        const pool = await poolPromise;
-        await pool.request().input('id', sql.Int, req.body.listing_id).input('seller_id', sql.Int, req.session.user.user_id).query("UPDATE listings SET status = 'Deleted' WHERE listing_id = @id AND seller_id = @seller_id");
-        res.json({ success: true });
-    } catch (err) { res.json({ success: false, message: 'Lỗi khi xóa sản phẩm!' }); }
-});
+app.engine('hbs', engine({ extname: '.hbs', defaultLayout: 'main', helpers: { eq: (a, b) => a == b } }));
+app.set('view engine', 'hbs');
 
-// --- ROUTE GIỎ HÀNG ---
-app.post('/cart/add', (req, res) => {
-    if (!req.session.user) return res.json({ success: false, message: 'Vui lòng đăng nhập!', redirect: '/login' });
-    const { listing_id } = req.body;
-    if (!req.session.cart.includes(listing_id)) req.session.cart.push(listing_id);
-    res.json({ success: true, cartCount: req.session.cart.length });
-});
-
-app.get('/cart', async (req, res) => {
-    if (!req.session.cart || req.session.cart.length === 0) return res.render('cart', { cartItems: [] });
-    try {
-        const pool = await poolPromise;
-        const validIds = req.session.cart.map(id => parseInt(id)).filter(id => !isNaN(id));
-        const query = `SELECT l.listing_id AS id, l.title, l.price, CASE WHEN i.image_url LIKE 'http%' THEN i.image_url ELSE '/images/' + ISNULL(i.image_url, 'default.jpg') END AS img FROM listings l LEFT JOIN listing_images i ON l.listing_id = i.listing_id AND i.is_thumbnail = 1 WHERE l.listing_id IN (${validIds.join(',')}) AND l.status = 'Active'`;
-        const result = await pool.request().query(query);
-        const cartItems = result.recordset.map(item => ({ ...item, price: formatPrice(item.price) }));
-        res.render('cart', { cartItems });
-    } catch (err) { res.render('cart', { cartItems: [] }); }
-});
-
-app.post('/cart/remove', (req, res) => {
-    req.session.cart = req.session.cart.filter(id => id !== req.body.listing_id);
-    res.redirect('/cart');
-});
-
-// --- ROUTE TÀI KHOẢN ---
+// ==========================================
+// ROUTES - AUTHENTICATION
+// ==========================================
 app.get('/login', (req, res) => res.render('login'));
 app.post('/login', async (req, res) => {
     try {
         const pool = await poolPromise;
-        const result = await pool.request().input('email', sql.NVarChar, req.body.email).input('password', sql.NVarChar, req.body.password).query('SELECT * FROM users WHERE email = @email AND password_hash = @password');
-        if (result.recordset.length > 0) {
+        const result = await pool.request()
+            .input('e', sql.NVarChar, req.body.email)
+            .input('p', sql.NVarChar, req.body.password)
+            .query('SELECT * FROM users WHERE email=@e AND password_hash=@p');
+        if (result.recordset.length) { 
             req.session.user = result.recordset[0]; 
-            showPopup(res, 'Thành công!', `Chào mừng ${result.recordset[0].full_name} trở lại!`, 'success', '/');
-        } else { showPopup(res, 'Thất bại!', 'Sai Email hoặc mật khẩu!', 'error', '/login'); }
-    } catch (err) { showPopup(res, 'Lỗi hệ thống!', 'Vui lòng thử lại sau.', 'error', '/login'); }
+            res.redirect('/'); 
+        } else showPopup(res, 'Lỗi', 'Sai tài khoản!', 'error', '/login');
+    } catch (err) { res.redirect('/login'); }
 });
-
 app.get('/register', (req, res) => res.render('register'));
 app.post('/register', async (req, res) => {
     try {
+        const { fullname, email, password, phone_number } = req.body;
         const pool = await poolPromise;
-        await pool.request().input('fullname', sql.NVarChar, req.body.fullname).input('phone', sql.NVarChar, req.body.phone_number).input('email', sql.NVarChar, req.body.email).input('password', sql.NVarChar, req.body.password).query('INSERT INTO users (full_name, phone_number, email, password_hash) VALUES (@fullname, @phone, @email, @password)');
-        showPopup(res, 'Tuyệt vời!', 'Đăng ký tài khoản thành công!', 'success', '/login');
-    } catch (err) { showPopup(res, 'Lỗi đăng ký!', 'Email này có thể đã được sử dụng.', 'error', '/register'); }
+        await pool.request()
+            .input('f', sql.NVarChar, fullname).input('e', sql.NVarChar, email)
+            .input('p', sql.NVarChar, password).input('ph', sql.NVarChar, phone_number)
+            .query("INSERT INTO users (full_name, email, password_hash, phone_number, role) VALUES (@f, @e, @p, @ph, 'user')");
+        showPopup(res, 'Thành công', 'Đã tạo tài khoản!', 'success', '/login');
+    } catch (err) { showPopup(res, 'Lỗi', 'Email hoặc SĐT đã tồn tại!', 'error', '/register'); }
 });
 app.get('/logout', (req, res) => { req.session.destroy(); res.redirect('/'); });
 
-// --- ROUTE ĐĂNG TIN ---
-app.get('/post-ad', checkLogin, async (req, res) => {
+// ==========================================
+// ROUTES - MẶT HÀNG (WEB)
+// ==========================================
+app.get('/', async (req, res) => {
     try {
         const pool = await poolPromise;
-        const categories = await pool.request().query('SELECT * FROM categories');
-        res.render('post-ad', { categories: categories.recordset });
-    } catch (err) { res.render('post-ad', { categories: [] }); }
+        const { keyword = '', category = '' } = req.query;
+        let query = `SELECT l.listing_id AS id, l.title, l.price, l.is_vip, CASE WHEN i.image_url LIKE 'http%' THEN i.image_url ELSE '/images/' + ISNULL(i.image_url, 'default.jpg') END AS img FROM listings l LEFT JOIN listing_images i ON l.listing_id = i.listing_id AND i.is_thumbnail = 1 WHERE l.status = 'Active'`;
+        const request = pool.request();
+        if (keyword.trim()) { query += ` AND l.title LIKE @key`; request.input('key', sql.NVarChar, `%${keyword}%`); }
+        if (category) { query += ` AND l.category_id = @cat`; request.input('cat', sql.Int, category); }
+        query += ` ORDER BY l.is_vip DESC, l.created_at DESC`;
+        const result = await request.query(query);
+        res.render('home', { listings: result.recordset.map(i => ({ ...i, price: formatPrice(i.price) })), keyword, selectedCategory: category });
+    } catch (err) { res.render('home', { listings: [] }); }
 });
+
+app.get('/product/:id', async (req, res) => {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request().input('id', sql.Int, req.params.id).query(`
+            SELECT l.*, u.full_name AS seller_name, u.phone_number,
+            CASE WHEN i.image_url LIKE 'http%' THEN i.image_url ELSE '/images/' + ISNULL(i.image_url, 'default.jpg') END AS img 
+            FROM listings l LEFT JOIN users u ON l.seller_id = u.user_id 
+            LEFT JOIN listing_images i ON l.listing_id = i.listing_id AND i.is_thumbnail = 1 
+            WHERE l.listing_id = @id AND l.status != 'Deleted'
+        `);
+        if (result.recordset.length) {
+            let p = result.recordset[0];
+            p.price = formatPrice(p.price);
+            res.render('product-detail', { product: p });
+        } else res.redirect('/');
+    } catch (err) { res.redirect('/'); }
+});
+
+// ==========================================
+// ROUTES - GIỎ HÀNG (DATABASE)
+// ==========================================
+app.get('/cart', checkLogin, async (req, res) => {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('uid', sql.Int, req.session.user.user_id)
+            .query(`SELECT l.*, CASE WHEN i.image_url LIKE 'http%' THEN i.image_url ELSE '/images/' + ISNULL(i.image_url, 'default.jpg') END AS img 
+                    FROM cart c JOIN listings l ON c.listing_id = l.listing_id 
+                    LEFT JOIN listing_images i ON l.listing_id = i.listing_id AND i.is_thumbnail = 1 
+                    WHERE c.user_id = @uid AND l.status != 'Deleted'`);
+        res.render('cart', { cartItems: result.recordset.map(i => ({ ...i, price: formatPrice(i.price) })) });
+    } catch (err) { res.render('cart', { cartItems: [] }); }
+});
+
+app.post('/cart/add', async (req, res) => {
+    if (!req.session.user) return res.json({ success: false, message: 'Vui lòng đăng nhập!', redirect: '/login' });
+    try {
+        const { listing_id } = req.body;
+        const pool = await poolPromise;
+        const check = await pool.request().input('uid', sql.Int, req.session.user.user_id).input('lid', sql.Int, listing_id).query("SELECT * FROM cart WHERE user_id=@uid AND listing_id=@lid");
+        if (check.recordset.length === 0) {
+            await pool.request().input('uid', sql.Int, req.session.user.user_id).input('lid', sql.Int, listing_id).query("INSERT INTO cart (user_id, listing_id) VALUES (@uid, @lid)");
+        }
+        const count = await pool.request().input('uid', sql.Int, req.session.user.user_id).query("SELECT COUNT(*) as total FROM cart WHERE user_id=@uid");
+        res.json({ success: true, cartCount: count.recordset[0].total });
+    } catch (err) { res.json({ success: false }); }
+});
+// Route XÓA SẢN PHẨM KHỎI GIỎ HÀNG (Lưu vĩnh viễn vào SQL)
+app.post('/cart/remove', checkLogin, async (req, res) => {
+    try {
+        const { listing_id } = req.body;
+        const userId = req.session.user.user_id;
+        const pool = await poolPromise;
+
+        // Xóa dòng tương ứng trong bảng cart của SQL Server
+        await pool.request()
+            .input('uid', sql.Int, userId)
+            .input('lid', sql.Int, listing_id)
+            .query("DELETE FROM cart WHERE user_id = @uid AND listing_id = @lid");
+
+        console.log(`✅ Đã xóa listing ${listing_id} khỏi giỏ hàng của user ${userId}`);
+        res.json({ success: true });
+    } catch (err) {
+        console.error("Lỗi xóa giỏ hàng:", err);
+        res.json({ success: false, message: "Không thể xóa sản phẩm khỏi giỏ hàng" });
+    }
+});
+// ==========================================
+// ROUTES - QUẢN LÝ TIN & ADMIN
+// ==========================================
+app.get('/my-listings', checkLogin, async (req, res) => {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request().input('uid', sql.Int, req.session.user.user_id).query(`SELECT l.listing_id as id, l.*, CASE WHEN i.image_url LIKE 'http%' THEN i.image_url ELSE '/images/' + ISNULL(i.image_url, 'default.jpg') END AS img FROM listings l LEFT JOIN listing_images i ON l.listing_id = i.listing_id AND i.is_thumbnail = 1 WHERE l.seller_id = @uid AND l.status != 'Deleted' ORDER BY l.created_at DESC`);
+        res.render('my-listings', { myListings: result.recordset.map(i => ({ ...i, price: formatPrice(i.price) })) });
+    } catch (err) { res.send("Lỗi tải danh sách tin"); }
+});
+
 app.post('/post-ad', checkLogin, upload.single('image_file'), async (req, res) => {
     try {
-        const { title, category_id, price, condition, location, description, image_url } = req.body;
-        let finalImage = 'default.jpg';
-        if (req.file) finalImage = req.file.filename;
-        else if (image_url && image_url.trim() !== '') finalImage = image_url;
-
+        const { title, category_id, price, description, condition, location } = req.body;
         const pool = await poolPromise;
-        const listingResult = await pool.request().input('seller_id', sql.Int, req.session.user.user_id).input('category_id', sql.Int, category_id || 1).input('title', sql.NVarChar, title).input('description', sql.NVarChar, description).input('price', sql.Decimal, price).input('condition', sql.Int, condition).input('location', sql.NVarChar, location).query(`INSERT INTO listings (seller_id, category_id, title, description, price, condition_percentage, location_gps, status) OUTPUT INSERTED.listing_id VALUES (@seller_id, @category_id, @title, @description, @price, @condition, @location, 'Active')`);
-        await pool.request().input('listing_id', sql.Int, listingResult.recordset[0].listing_id).input('image_url', sql.NVarChar, finalImage).query(`INSERT INTO listing_images (listing_id, image_url, is_thumbnail) VALUES (@listing_id, @image_url, 1)`);
-            
-        showPopup(res, 'Thành công!', 'Sản phẩm của bạn đã được đăng lên sàn!', 'success', '/');
-    } catch (err) { showPopup(res, 'Đăng tin thất bại!', 'Vui lòng kiểm tra lại thông tin.', 'error', 'back'); }
+        const result = await pool.request()
+            .input('sid', sql.Int, req.session.user.user_id).input('cid', sql.Int, category_id)
+            .input('t', sql.NVarChar, title).input('d', sql.NVarChar, description)
+            .input('p', sql.Decimal, price).input('con', sql.Int, condition).input('loc', sql.NVarChar, location)
+            .query(`INSERT INTO listings (seller_id, category_id, title, description, price, condition_percentage, location_gps, status) OUTPUT INSERTED.listing_id VALUES (@sid, @cid, @t, @d, @p, @con, @loc, 'Pending')`);
+        const img = req.file ? req.file.filename : 'default.jpg';
+        await pool.request().input('lid', sql.Int, result.recordset[0].listing_id).input('url', sql.NVarChar, img).query(`INSERT INTO listing_images (listing_id, image_url, is_thumbnail) VALUES (@lid, @url, 1)`);
+        showPopup(res, 'Thành công', 'Tin đang chờ Admin duyệt!', 'info', '/my-listings');
+    } catch (err) { showPopup(res, 'Lỗi', 'Lỗi đăng tin!', 'error', 'back'); }
 });
 
-app.listen(PORT, () => console.log(`🚀 Hệ thống SHM đang chạy tại: http://localhost:${PORT}`));
+app.post('/delete-listing', checkLogin, async (req, res) => {
+    try {
+        await (await poolPromise).request().input('id', sql.Int, req.body.listing_id).query("UPDATE listings SET status = 'Deleted' WHERE listing_id = @id");
+        res.json({ success: true });
+    } catch (err) { res.json({ success: false }); }
+});
+
+app.get('/admin', checkAdmin, async (req, res) => {
+    try {
+        const pool = await poolPromise;
+        const ads = await pool.request().query("SELECT l.*, u.full_name FROM listings l JOIN users u ON l.seller_id = u.user_id WHERE l.status = 'Pending'");
+        const vips = await pool.request().query("SELECT l.*, u.full_name FROM listings l JOIN users u ON l.seller_id = u.user_id WHERE l.is_pending_vip = 1");
+        const all = await pool.request().query("SELECT l.*, u.full_name FROM listings l JOIN users u ON l.seller_id = u.user_id WHERE l.status = 'Active' ORDER BY l.is_vip DESC");
+        res.render('admin-dashboard', { pendingAds: ads.recordset, pendingVip: vips.recordset, allListings: all.recordset.map(i => ({...i, price: formatPrice(i.price)})) });
+    } catch (err) { res.status(500).send("Lỗi Admin"); }
+});
+
+app.post('/admin/approve-ad', checkAdmin, async (req, res) => {
+    try {
+        await (await poolPromise).request().input('id', sql.Int, req.body.listing_id).query("UPDATE listings SET status = 'Active' WHERE listing_id = @id");
+        res.json({ success: true });
+    } catch (err) { res.json({ success: false }); }
+});
+
+app.post('/admin/approve-vip', checkAdmin, async (req, res) => {
+    try {
+        await (await poolPromise).request().input('id', sql.Int, req.body.listing_id).query("UPDATE listings SET is_vip = 1, is_pending_vip = 0 WHERE listing_id = @id");
+        res.json({ success: true });
+    } catch (err) { res.json({ success: false }); }
+});
+
+// ==========================================
+// API DÀNH CHO MOBILE (JSON ONLY)
+// ==========================================
+app.get('/api/categories', async (req, res) => {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request().query("SELECT * FROM categories ORDER BY category_name ASC");
+        res.json({ success: true, data: result.recordset });
+    } catch (err) { res.status(500).json({ success: false, error: err.message }); }
+});
+
+app.get('/api/listings', async (req, res) => {
+    try {
+        const { keyword = '', category_id = '' } = req.query;
+        const pool = await poolPromise;
+        let query = `SELECT l.*, i.image_url FROM listings l LEFT JOIN listing_images i ON l.listing_id = i.listing_id AND i.is_thumbnail = 1 WHERE l.status = 'Active'`;
+        if (keyword) query += ` AND l.title LIKE '%${keyword}%'`;
+        if (category_id) query += ` AND l.category_id = ${category_id}`;
+        const result = await pool.request().query(query + " ORDER BY l.is_vip DESC");
+        res.json({ success: true, data: result.recordset });
+    } catch (err) { res.status(500).json({ success: false }); }
+});
+
+app.listen(PORT, () => console.log(`🚀 SERVER READY: http://localhost:${PORT}`));

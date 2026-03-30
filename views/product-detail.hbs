@@ -1,48 +1,139 @@
 <div class="container mt-5">
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a href="/" class="text-decoration-none">Trang chủ</a></li>
             <li class="breadcrumb-item active" aria-current="page">Chi tiết sản phẩm</li>
         </ol>
     </nav>
 
-    <div class="row bg-white p-4 rounded shadow-sm border mt-3">
-        <div class="col-md-5 text-center mb-4 mb-md-0">
-            <img src="{{product.img}}" alt="{{product.title}}" class="img-fluid rounded border" style="max-height: 400px; object-fit: cover;" onerror="this.src='https://via.placeholder.com/400x400?text=SHM+Marketplace'">
+    <div class="row bg-white p-4 rounded-4 shadow-sm border mt-3 animate__animated animate__fadeIn">
+        <div class="col-md-5 text-center mb-4 mb-md-0 position-relative">
+            {{#if product.is_vip}}
+            <div class="position-absolute top-0 start-0 m-3" style="z-index: 10;">
+                <i class="fas fa-crown fa-3x text-warning animate__animated animate__swing animate__infinite"></i>
+            </div>
+            {{/if}}
+            
+            <img src="{{product.img}}" alt="{{product.title}}" 
+                 class="img-fluid rounded-3 border shadow-sm w-100" 
+                 style="max-height: 450px; object-fit: cover;" 
+                 onerror="this.onerror=null; this.src='/images/default.jpg';">
         </div>
 
-        <div class="col-md-7">
-            <h2 class="fw-bold text-dark mb-3">{{product.title}}</h2>
-            <h3 class="text-danger fw-bold mb-4">{{product.price}} VNĐ</h3>
+        <div class="col-md-7 ps-md-5">
+            <div class="d-flex align-items-center mb-2">
+                <h2 class="fw-bold text-dark mb-0">{{product.title}}</h2>
+                {{#if product.is_vip}}
+                    <span class="badge bg-warning text-dark ms-2 animate__animated animate__flash animate__infinite">VIP</span>
+                {{/if}}
+            </div>
             
-            <ul class="list-unstyled mb-4 text-muted">
-                <li class="mb-2"><i class="fas fa-user-tag me-2 text-primary"></i> <strong>Người bán:</strong> {{product.seller_name}}</li>
-                <li class="mb-2"><i class="fas fa-map-marker-alt me-2 text-danger"></i> <strong>Khu vực:</strong> {{product.location}}</li>
-                <li class="mb-2"><i class="fas fa-certificate me-2 text-success"></i> <strong>Độ mới:</strong> {{product.condition}}%</li>
-            </ul>
-
-            <div class="mb-4">
-                <h5 class="fw-bold">Mô tả sản phẩm:</h5>
-                <p class="text-dark bg-light p-3 rounded border" style="white-space: pre-wrap;">{{product.description}}</p>
+            <h3 class="text-danger fw-bold mb-4 fs-2">{{product.price}} đ</h3>
+            
+            <div class="card bg-light border-0 rounded-3 mb-4">
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-3 d-flex align-items-center">
+                            <div class="icon-box bg-white rounded-circle p-2 me-3 shadow-sm">
+                                <i class="fas fa-user-tie text-primary"></i>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block">Người bán</small>
+                                <strong>{{product.seller_name}}</strong>
+                            </div>
+                        </li>
+                        <li class="mb-3 d-flex align-items-center">
+                            <div class="icon-box bg-white rounded-circle p-2 me-3 shadow-sm">
+                                <i class="fas fa-map-marker-alt text-danger"></i>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block">Khu vực</small>
+                                <strong>{{product.location_gps}}</strong>
+                            </div>
+                        </li>
+                        <li class="d-flex align-items-center">
+                            <div class="icon-box bg-white rounded-circle p-2 me-3 shadow-sm">
+                                <i class="fas fa-shield-alt text-success"></i>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block">Tình trạng</small>
+                                <strong>Mới {{product.condition_percentage}}%</strong>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
             </div>
 
-            <div class="d-flex gap-3 mt-4">
-                <form action="/cart/add" method="POST" class="w-50">
-                    <input type="hidden" name="listing_id" value="{{product.id}}">
-                    <button type="submit" class="btn btn-warning btn-lg w-100 fw-bold">
-                        <i class="fas fa-cart-plus me-2"></i> Thêm vào giỏ
-                    </button>
-                </form>
-                <button class="btn btn-success btn-lg w-50 fw-bold" 
-    onclick="Swal.fire({
-        title: 'Đã gửi!',
-        text: 'Tin nhắn của bạn đã được gửi đến người bán an toàn.',
-        icon: 'success',
-        confirmButtonColor: '#198754'
-    })">
-    <i class="fas fa-comments me-2"></i> Chat với người bán
-</button>
+            <div class="mb-4">
+                <h5 class="fw-bold mb-3"><i class="fas fa-align-left me-2"></i>Mô tả chi tiết:</h5>
+                <div class="p-3 rounded-3 border bg-white" style="white-space: pre-wrap; line-height: 1.6; color: #444;">{{product.description}}</div>
+            </div>
+
+            <div class="d-flex gap-3 mt-5">
+                <button onclick="addToCart('{{product.listing_id}}')" class="btn btn-warning btn-lg flex-grow-1 fw-bold py-3 shadow-sm border-0 rounded-pill">
+                    <i class="fas fa-cart-plus me-2"></i> THÊM VÀO GIỎ
+                </button>
+                
+                <button class="btn btn-success btn-lg flex-grow-1 fw-bold py-3 shadow-sm border-0 rounded-pill" 
+                    onclick="contactSeller('{{product.full_name}}', '{{product.phone_number}}')">
+                    <i class="fas fa-phone-alt me-2"></i> GỌI NGƯỜI BÁN
+                </button>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .icon-box { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
+    .btn-warning { background-color: #ffc107; color: #000; transition: all 0.3s; }
+    .btn-warning:hover { background-color: #e0a800; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255, 193, 7, 0.4); }
+    .btn-success { transition: all 0.3s; }
+    .btn-success:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(25, 135, 84, 0.4); }
+</style>
+
+<script>
+// Hàm xử lý Thêm vào giỏ hàng qua AJAX
+async function addToCart(id) {
+    const res = await fetch('/cart/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ listing_id: id })
+    });
+    const data = await res.json();
+    
+    if (data.success) {
+        Swal.fire('Thành công', 'Đã thêm vào giỏ hàng!', 'success').then(() => location.reload());
+    } else {
+        // NẾU CHƯA ĐĂNG NHẬP: Hiện thông báo rồi mới chuyển hướng
+        Swal.fire({
+            title: 'Yêu cầu đăng nhập',
+            text: data.message,
+            icon: 'warning',
+            confirmButtonText: 'Đến trang Đăng nhập',
+            confirmButtonColor: '#ffc107'
+        }).then((result) => {
+            if (result.isConfirmed && data.redirect) {
+                window.location.href = data.redirect; // Chuyển hướng sang /login
+            }
+        });
+    }
+}
+
+// Hàm hiện thông tin liên hệ người bán
+function contactSeller(name, phone) {
+    Swal.fire({
+        title: 'Thông tin người bán',
+        html: `
+            <div class="text-start p-3">
+                <p><strong>Họ tên:</strong> ${name}</p>
+                <p><strong>Số điện thoại:</strong> <span class="text-danger fw-bold fs-4">${phone}</span></p>
+                <hr>
+                <p class="small text-muted italic">* Vui lòng nhắc đến SHM khi gọi điện để được ưu đãi.</p>
+            </div>
+        `,
+        icon: 'info',
+        confirmButtonText: 'Đã hiểu',
+        confirmButtonColor: '#198754'
+    });
+}
+</script>

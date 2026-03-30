@@ -1,98 +1,97 @@
-<div class="container mt-4 mb-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold m-0 text-danger"><i class="fas fa-user-shield me-2"></i> Khu vực Admin</h2>
-    </div>
+<div class="container mt-4">
+    <h2 class="fw-bold mb-4 text-uppercase"><i class="fas fa-user-shield me-2"></i>Bảng Điều Khiển Admin</h2>
 
-    <div class="row g-4 mb-5">
-        <div class="col-md-6">
-            <div class="card bg-primary text-white shadow border-0 h-100 p-3">
-                <div class="card-body d-flex align-items-center">
-                    <i class="fas fa-users fa-3x me-4 opacity-50"></i>
-                    <div>
-                        <h5 class="card-title fw-bold mb-1">Tổng người dùng</h5>
-                        <h2 class="display-5 fw-bold m-0">{{totalUsers}}</h2>
-                    </div>
+    {{#if pendingVip.length}}
+    <div class="card border-warning mb-5 shadow animate__animated animate__fadeIn">
+        <div class="card-header bg-warning text-dark fw-bold d-flex align-items-center">
+            <i class="fas fa-coins me-2 fs-4 animate__animated animate__swing animate__infinite"></i> 
+            YÊU CẦU DUYỆT VIP MỚI
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Khách hàng</th>
+                        <th>Sản phẩm</th>
+                        <th class="text-center">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each pendingVip}}
+                    <tr>
+                        <td class="fw-bold">#{{this.listing_id}}</td>
+                        <td>{{this.full_name}}</td>
+                        <td>{{this.title}}</td>
+                        <td class="text-center">
+                            <button class="btn btn-success btn-sm fw-bold px-3 shadow-sm" onclick="approveVip({{this.listing_id}})">
+                                <i class="fas fa-check-circle me-1"></i> DUYỆT (2K)
+                            </button>
+                        </td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {{/if}}
+<div class="card mb-4 border-0 shadow-sm">
+    <div class="card-body bg-light rounded-3">
+        <form action="/admin" method="GET" class="row g-2">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
+                    <input type="text" name="keyword" class="form-control border-start-0" placeholder="Tìm tên sản phẩm hoặc người đăng..." value="{{adminKeyword}}">
                 </div>
             </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card bg-success text-white shadow border-0 h-100 p-3">
-                <div class="card-body d-flex align-items-center">
-                    <i class="fas fa-box-open fa-3x me-4 opacity-50"></i>
-                    <div>
-                        <h5 class="card-title fw-bold mb-1">Sản phẩm đang hiển thị</h5>
-                        <h2 class="display-5 fw-bold m-0">{{totalListings}}</h2>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="card shadow-sm border-0">
-        <div class="card-header bg-white py-3 d-flex flex-wrap justify-content-between align-items-center gap-3">
-            <h5 class="m-0 fw-bold"><i class="fas fa-list me-2"></i> Quản lý toàn bộ tin đăng</h5>
-            
-            <form action="/admin" method="GET" class="d-flex" style="max-width: 600px; width: 100%;">
-                
-                <select name="category" class="form-select me-2 border-primary" style="width: 200px; cursor: pointer;">
+            <div class="col-md-4">
+                <select name="category" class="form-select">
                     <option value="">Tất cả danh mục</option>
-                    {{#each categories}}
-                        <option value="{{this.category_id}}" {{#if (eq this.category_id ../categoryQuery)}}selected{{/if}}>
+                    {{#each globalCategories}}
+                        <option value="{{this.category_id}}" {{#if (eq ../adminCategory this.category_id)}}selected{{/if}}>
                             {{this.category_name}}
                         </option>
                     {{/each}}
                 </select>
-
-                <input type="text" name="search" class="form-control me-2 border-primary" placeholder="Tìm tên sản phẩm..." value="{{searchQuery}}">
-                
-                <button type="submit" class="btn btn-primary fw-bold text-nowrap"><i class="fas fa-filter"></i> Lọc</button>
-                
-                {{#if hasFilter}}
-                    <a href="/admin" class="btn btn-outline-secondary ms-2 text-nowrap" title="Xóa bộ lọc"><i class="fas fa-times"></i></a>
-                {{/if}}
-            </form>
-
-        </div>
-        <div class="card-body p-0 table-responsive">
-            <table class="table table-hover align-middle m-0">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-dark w-100 fw-bold">LỌC TIN</button>
+            </div>
+        </form>
+    </div>
+</div>
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-dark text-white fw-bold">Tất cả sản phẩm trên sàn</div>
+        <div class="card-body p-0">
+            <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th class="ps-4">Tên sản phẩm</th>
-                        <th>Danh mục</th>
-                        <th>Người bán</th>
-                        <th>Giá tiền</th>
-                        <th>Trạng thái</th>
-                        <th class="text-end pe-4">Hành động</th>
+                        <th>Hình ảnh</th>
+                        <th>Tên sản phẩm</th>
+                        <th>Loại tin</th>
+                        <th>Giá</th>
+                        <th>Thao tác</th>
                     </tr>
                 </thead>
                 <tbody>
                     {{#each allListings}}
-                    <tr id="admin-listing-{{this.id}}">
-                        <td class="ps-4 fw-medium">{{this.title}}</td>
-                        <td><span class="badge bg-info text-dark">{{this.category_name}}</span></td>
-                        <td><i class="fas fa-user-circle text-secondary me-1"></i> {{this.seller_name}}</td>
+                    <tr>
+                        <td><img src="{{this.img}}" width="50" class="rounded shadow-sm"></td>
+                        <td><strong>{{this.title}}</strong></td>
+                        <td>
+                            {{#if this.is_vip}}
+                                <span class="badge bg-warning text-dark animate__animated animate__flash animate__infinite animate__slow">
+                                    <i class="fas fa-crown me-1"></i> VIP
+                                </span>
+                            {{else}}
+                                <span class="badge bg-light text-muted border">Thường</span>
+                            {{/if}}
+                        </td>
                         <td class="text-danger fw-bold">{{this.price}} đ</td>
                         <td>
-                            {{#if (eq this.status 'Active')}}
-                                <span class="badge bg-success">Hiển thị</span>
-                            {{else}}
-                                <span class="badge bg-secondary">Đã gỡ</span>
-                            {{/if}}
-                        </td>
-                        <td class="text-end pe-4">
-                            {{#if (eq this.status 'Active')}}
-                            <button class="btn btn-sm btn-outline-danger fw-bold" onclick="adminDeleteListing({{this.id}})">
-                                <i class="fas fa-trash-alt"></i> Xóa vi phạm
+                            <button class="btn btn-outline-danger btn-sm" onclick="deleteProduct({{this.listing_id}})">
+                                <i class="fas fa-trash"></i>
                             </button>
-                            {{/if}}
-                        </td>
-                    </tr>
-                    {{else}}
-                    <tr>
-                        <td colspan="6" class="text-center py-5 text-muted">
-                            <i class="fas fa-search fa-3x mb-3 opacity-25"></i>
-                            <h5>Không tìm thấy sản phẩm nào!</h5>
-                            <p>Thử đổi từ khóa hoặc danh mục khác xem sao.</p>
                         </td>
                     </tr>
                     {{/each}}
@@ -101,36 +100,105 @@
         </div>
     </div>
 </div>
+{{#if pendingAds.length}}
+<div class="card border-info mb-4 shadow-sm animate__animated animate__fadeIn">
+    <div class="card-header bg-info text-white fw-bold">
+        <i class="fas fa-clipboard-check me-2"></i> CÓ {{pendingAds.length}} TIN MỚI CHỜ DUYỆT NỘI DUNG
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <tbody>
+                {{#each pendingAds}}
+                <tr>
+                    <td>#{{this.listing_id}}</td>
+                    <td><strong>{{this.full_name}}</strong></td>
+                    <td>{{this.title}}</td>
+                    <td class="text-end">
+                        <button class="btn btn-outline-primary btn-sm" onclick="approveAd({{this.listing_id}})">
+                            Duyệt tin
+                        </button>
+                    </td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+    </div>
+</div>
+{{/if}}
 
 <script>
-    function adminDeleteListing(id) {
-        Swal.fire({
-            title: 'Quyền sinh quyền sát!',
-            text: "Bạn có chắc muốn ép gỡ bài đăng này khỏi hệ thống?",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#dc3545',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Xóa ngay',
-            cancelButtonText: 'Hủy'
-        }).then(async (result) => {
-            if (result.isConfirmed) {
-                try {
-                    const response = await fetch('/admin/delete-listing', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ listing_id: id })
-                    });
-                    const data = await response.json();
-                    if (data.success) {
-                        Swal.fire('Đã xóa!', 'Bài đăng đã bị gỡ khỏi sàn.', 'success').then(() => {
-                            window.location.reload(); 
-                        });
-                    } else {
-                        Swal.fire('Lỗi!', data.message, 'error');
-                    }
-                } catch (err) { console.error(err); }
-            }
-        });
+// Hàm duyệt tin thường
+async function approveAd(id) {
+    const res = await fetch('/admin/approve-ad', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ listing_id: id })
+    });
+    const data = await res.json();
+    if(data.success) {
+        Swal.fire('Thành công', 'Tin đã được hiển thị trên trang chủ!', 'success').then(() => location.reload());
     }
+}
+</script>
+<script>
+// Hàm xử lý duyệt VIP
+// Thay thế hàm approveVip cũ
+async function approveVip(id) {
+    // Sử dụng SweetAlert2 để tạo popup xác nhận
+    const result = await Swal.fire({
+        title: 'Xác nhận duyệt VIP?',
+        text: `Bạn đã kiểm tra tài khoản và nhận đủ 2.000đ cho tin #${id} chưa?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#198754', // Màu xanh lá thành công
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Đã nhận tiền, Duyệt ngay!',
+        cancelButtonText: 'Chưa nhận được',
+        reverseButtons: true
+    });
+
+    if (result.isConfirmed) {
+        // Hiện hiệu ứng đang xử lý cho chuyên nghiệp
+        Swal.fire({
+            title: 'Đang kích hoạt...',
+            didOpen: () => { Swal.showLoading(); }
+        });
+
+        try {
+            const res = await fetch('/admin/approve-vip', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ listing_id: id })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                await Swal.fire({
+                    title: 'Thành công!',
+                    text: 'Sản phẩm đã chính thức lên VIP lấp lánh.',
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+                location.reload();
+            } else {
+                Swal.fire('Lỗi', 'Không thể duyệt lúc này, thử lại sau nhé!', 'error');
+            }
+        } catch (err) {
+            Swal.fire('Lỗi kết nối', 'Server có vẻ đang bận rồi Thế Anh ơi!', 'error');
+        }
+    }
+}
+// Hàm xử lý xóa tin đăng
+async function deleteProduct(id) {
+    if(confirm('Bạn có chắc muốn xóa vĩnh viễn tin đăng này không?')) {
+        const res = await fetch('/admin/delete-product', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ listing_id: id })
+        });
+        const data = await res.json();
+        if(data.success) location.reload();
+    }
+}
 </script>

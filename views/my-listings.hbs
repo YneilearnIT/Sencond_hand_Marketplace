@@ -1,68 +1,86 @@
-<div class="container mt-5">
+<div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold m-0"><i class="fas fa-box-open text-primary me-2"></i> Quản lý tin đăng của bạn</h2>
-        <a href="/post-ad" class="btn btn-outline-primary"><i class="fas fa-plus"></i> Đăng thêm đồ</a>
+        <h2 class="fw-bold">Tin đăng của tôi</h2>
+        <a href="/post-ad" class="btn btn-warning fw-bold rounded-pill shadow-sm">
+            <i class="fas fa-plus-circle me-1"></i> Đăng tin mới
+        </a>
     </div>
 
-    <div class="row row-cols-1 row-cols-md-3 g-4">
-        {{#each myListings}}
-        <div class="col" id="listing-{{this.id}}">
-            <div class="card h-100 shadow-sm border-0 position-relative">
-                <span class="badge bg-success position-absolute top-0 end-0 m-2 px-3 py-2">Đang hiển thị</span>
-                <img src="{{this.img}}" class="card-img-top" style="height: 200px; object-fit: cover;">
-                
-                <div class="card-body">
-                    <h5 class="card-title text-truncate">{{this.title}}</h5>
-                    <h6 class="text-danger fw-bold mb-3">{{this.price}} đ</h6>
-                </div>
-                
-                <div class="card-footer bg-white border-top-0 pb-3">
-                    <button class="btn btn-outline-danger w-100 fw-bold" onclick="deleteListing({{this.id}})">
-                        <i class="fas fa-trash-alt me-2"></i> Gỡ tin này
-                    </button>
+    <div class="row">
+        {{#if myListings.length}}
+            {{#each myListings}}
+            <div class="col-12 mb-3">
+                <div class="card shadow-sm border-0 rounded-3 overflow-hidden">
+                    <div class="card-body d-flex align-items-center p-3">
+                        <img src="{{this.img}}" alt="{{this.title}}" class="rounded" style="width: 100px; height: 100px; object-fit: cover;">
+                        
+                        <div class="flex-grow-1 ms-4">
+                            <h5 class="fw-bold mb-1">{{this.title}}</h5>
+                            <p class="text-primary fw-bold fs-5 mb-0">{{this.price}} đ</p>
+                            <span class="badge bg-light text-secondary border">ID: {{this.id}}</span>
+                        </div>
+
+                        <div class="text-end d-flex flex-column gap-2">
+                          {{#if this.is_vip}}
+    <button class="btn btn-warning text-dark fw-bold px-3 py-2 disabled shadow-sm">
+        <i class="fas fa-crown me-1"></i> Đang ưu tiên
+    </button>
+{{else}}
+    <a href="/promote/{{#if this.id}}{{this.id}}{{else}}{{this.listing_id}}{{/if}}" class="btn btn-outline-warning fw-bold px-3 py-2 shadow-sm">
+        <i class="fas fa-rocket me-1"></i> Mua ưu tiên
+    </a>
+{{/if}}
+                            
+                            <button class="btn btn-outline-danger btn-sm border-0" onclick="deleteListing({{this.id}})">
+                                <i class="fas fa-trash-alt me-1"></i> Xóa tin
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
+            {{/each}}
         {{else}}
-        <div class="col-12 text-center py-5">
-            <img src="https://cdn-icons-png.flaticon.com/512/1041/1041885.png" width="100" class="mb-3 opacity-50">
-            <h5 class="text-muted">Bạn chưa đăng bán sản phẩm nào.</h5>
-            <a href="/post-ad" class="btn btn-primary mt-3 rounded-pill px-4">Đăng tin ngay</a>
-        </div>
-        {{/each}}
+            <div class="col-12 text-center py-5">
+                <div class="display-1 text-muted mb-3"><i class="fas fa-box-open"></i></div>
+                <h4 class="text-secondary">Bạn chưa có tin đăng nào.</h4>
+                <a href="/post-ad" class="btn btn-primary mt-3">Đăng tin ngay thôi!</a>
+            </div>
+        {{/if}}
     </div>
 </div>
-
+<button onclick="deleteListing({{this.id}})" class="btn btn-link text-danger p-0">
+    <i class="fas fa-trash me-1"></i> Xóa tin
+</button>
 <script>
-    function deleteListing(id) {
-        Swal.fire({
-            title: 'Bạn có chắc chắn?',
-            text: "Sản phẩm này sẽ bị gỡ xuống khỏi sàn giao dịch!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#dc3545',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Đồng ý gỡ',
-            cancelButtonText: 'Hủy'
-        }).then(async (result) => {
-            if (result.isConfirmed) {
-                try {
-                    const response = await fetch('/my-listings/delete', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ listing_id: id })
-                    });
-                    const data = await response.json();
-                    
-                    if (data.success) {
-                        Swal.fire('Đã gỡ!', 'Tin đăng của bạn đã được xóa thành công.', 'success');
-                        // Làm biến mất thẻ sản phẩm trên màn hình
-                        document.getElementById('listing-' + id).remove();
-                    } else {
-                        Swal.fire('Lỗi!', data.message, 'error');
-                    }
-                } catch (err) { console.error(err); }
+async function deleteListing(id) {
+    const result = await Swal.fire({
+        title: 'Xóa tin này?',
+        text: "Tin đăng của bạn sẽ bị gỡ bỏ khỏi hệ thống!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonText: 'Hủy',
+        confirmButtonText: 'Đồng ý xóa'
+    });
+
+    if (result.isConfirmed) {
+        try {
+            const res = await fetch('/delete-listing', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ listing_id: id }) // Gửi ID tin cần xóa
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                await Swal.fire('Thành công!', 'Tin đăng đã được xóa.', 'success');
+                location.reload(); // LOAD LẠI TRANG ĐỂ TIN BIẾN MẤT
+            } else {
+                Swal.fire('Lỗi', 'Không thể xóa tin lúc này!', 'error');
             }
-        });
+        } catch (err) {
+            Swal.fire('Lỗi', 'Mất kết nối với máy chủ!', 'error');
+        }
     }
+}
 </script>

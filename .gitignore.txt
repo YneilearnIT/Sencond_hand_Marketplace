@@ -11,3 +11,6 @@
 # File hệ thống
 .DS_Store
 Thumbs.db
+
+.env
+public/images/shm-* ngrok.exe

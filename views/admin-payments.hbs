@@ -1,0 +1,53 @@
+<div class="container mt-4">
+    <div class="card shadow border-0">
+        <div class="card-header bg-dark text-white p-3">
+            <h4 class="mb-0"><i class="fas fa-money-bill-wave me-2"></i>Duyệt Thanh Toán VIP</h4>
+        </div>
+        <div class="card-body">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Người đăng</th>
+                        <th>Sản phẩm</th>
+                        <th>Nội dung chuyển khoản</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each pendingList}}
+                    <tr>
+                        <td><strong>{{this.full_name}}</strong></td>
+                        <td>{{this.title}}</td>
+                        <td><span class="badge bg-primary">SHM_PRO_ID{{this.listing_id}}</span></td>
+                        <td>
+                            <button class="btn btn-success fw-bold" onclick="approve({{this.listing_id}})">
+                                <i class="fas fa-check"></i> Duyệt
+                            </button>
+                        </td>
+                    </tr>
+                    {{/each}}
+                    {{#unless pendingList}}
+                    <tr><td colspan="4" class="text-center py-4 text-muted">Không có yêu cầu nào đang chờ.</td></tr>
+                    {{/unless}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+async function approve(id) {
+    if(confirm('Xác nhận đã nhận được 2.000đ của tin này?')) {
+        const res = await fetch('/admin/approve-vip', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ listing_id: id })
+        });
+        const data = await res.json();
+        if(data.success) {
+            alert('Đã duyệt thành công!');
+            location.reload();
+        }
+    }
+}
+</script>
