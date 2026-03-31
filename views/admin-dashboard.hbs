@@ -1,204 +1,135 @@
-<div class="container mt-4">
-    <h2 class="fw-bold mb-4 text-uppercase"><i class="fas fa-user-shield me-2"></i>Bảng Điều Khiển Admin</h2>
-
-    {{#if pendingVip.length}}
-    <div class="card border-warning mb-5 shadow animate__animated animate__fadeIn">
-        <div class="card-header bg-warning text-dark fw-bold d-flex align-items-center">
-            <i class="fas fa-coins me-2 fs-4 animate__animated animate__swing animate__infinite"></i> 
-            YÊU CẦU DUYỆT VIP MỚI
-        </div>
-        <div class="card-body p-0">
-            <table class="table table-hover mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>ID</th>
-                        <th>Khách hàng</th>
-                        <th>Sản phẩm</th>
-                        <th class="text-center">Hành động</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {{#each pendingVip}}
-                    <tr>
-                        <td class="fw-bold">#{{this.listing_id}}</td>
-                        <td>{{this.full_name}}</td>
-                        <td>{{this.title}}</td>
-                        <td class="text-center">
-                            <button class="btn btn-success btn-sm fw-bold px-3 shadow-sm" onclick="approveVip({{this.listing_id}})">
-                                <i class="fas fa-check-circle me-1"></i> DUYỆT (2K)
-                            </button>
-                        </td>
-                    </tr>
-                    {{/each}}
-                </tbody>
-            </table>
-        </div>
-    </div>
-    {{/if}}
-<div class="card mb-4 border-0 shadow-sm">
-    <div class="card-body bg-light rounded-3">
-        <form action="/admin" method="GET" class="row g-2">
-            <div class="col-md-6">
-                <div class="input-group">
-                    <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
-                    <input type="text" name="keyword" class="form-control border-start-0" placeholder="Tìm tên sản phẩm hoặc người đăng..." value="{{adminKeyword}}">
+<div class="container-fluid mt-4 mb-5">
+    <div class="row">
+        <div class="col-md-3 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white"><h5 class="mb-0 fw-bold"><i class="fas fa-cogs"></i> Menu Quản Trị</h5></div>
+                <div class="card-body p-0">
+                    <div class="nav flex-column nav-pills" id="admin-tabs" role="tablist" aria-orientation="vertical">
+                        <button class="nav-link active text-start rounded-0 border-bottom py-3" id="tab-products" data-bs-toggle="pill" data-bs-target="#pane-products" type="button">📦 Quản lý sản phẩm</button>
+                        <button class="nav-link text-start rounded-0 border-bottom py-3 d-flex justify-content-between align-items-center" id="tab-pending" data-bs-toggle="pill" data-bs-target="#pane-pending" type="button">
+                            <span>📝 Duyệt tin đăng</span> {{#if pendingAds.length}}<span class="badge bg-danger rounded-pill">{{pendingAds.length}}</span>{{/if}}
+                        </button>
+                        <button class="nav-link text-start rounded-0 border-bottom py-3 d-flex justify-content-between align-items-center" id="tab-vip" data-bs-toggle="pill" data-bs-target="#pane-vip" type="button">
+                            <span>⭐ Duyệt mua gói VIP</span> {{#if pendingVip.length}}<span class="badge bg-warning text-dark rounded-pill">{{pendingVip.length}}</span>{{/if}}
+                        </button>
+                        <button class="nav-link text-start rounded-0 border-bottom py-3 d-flex justify-content-between align-items-center bg-danger text-white" id="tab-reports" data-bs-toggle="pill" data-bs-target="#pane-reports" type="button">
+                            <span class="fw-bold">🚨 Quản lý báo cáo</span> {{#if pendingReports.length}}<span class="badge bg-light text-danger rounded-pill">{{pendingReports.length}}</span>{{/if}}
+                        </button>
+                        <button class="nav-link text-start rounded-0 py-3 d-flex justify-content-between align-items-center bg-dark text-white" id="tab-kyc" data-bs-toggle="pill" data-bs-target="#pane-kyc" type="button">
+                            <span class="fw-bold">🛡️ Duyệt danh tính (KYC)</span> {{#if pendingKycs.length}}<span class="badge bg-success rounded-pill">{{pendingKycs.length}}</span>{{/if}}
+                        </button>
+                    </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <select name="category" class="form-select">
-                    <option value="">Tất cả danh mục</option>
-                    {{#each globalCategories}}
-                        <option value="{{this.category_id}}" {{#if (eq ../adminCategory this.category_id)}}selected{{/if}}>
-                            {{this.category_name}}
-                        </option>
-                    {{/each}}
-                </select>
+        </div>
+
+        <div class="col-md-9">
+            <div class="tab-content" id="admin-tabs-content">
+                
+                <div class="tab-pane fade show active" id="pane-products" role="tabpanel">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center"><h5 class="mb-0">Tất cả sản phẩm</h5><input type="text" id="searchProductInput" class="form-control form-control-sm w-50" placeholder="🔍 Lọc nhanh..."></div>
+                        <div class="card-body p-0"><div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead class="table-light"><tr><th>Mã SP</th><th>Hình ảnh</th><th>Tên sản phẩm</th><th>Người bán</th><th>Giá</th><th>Loại tin</th><th>Thao tác</th></tr></thead>
+                        <tbody>{{#each allListings}}<tr class="product-row"><td class="fw-bold text-primary">#SP-{{this.listing_id}}</td><td><img src="{{this.img}}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;"></td><td class="fw-bold">{{this.title}}</td><td>{{this.full_name}}</td><td class="text-danger fw-bold">{{this.price}} đ</td><td>{{#if this.is_vip}}<span class="badge bg-warning text-dark">VIP</span>{{else}}<span class="badge bg-secondary">Thường</span>{{/if}}</td><td><button class="btn btn-outline-danger btn-sm btn-delete-ad" data-id="{{this.listing_id}}">🗑️ Xóa</button></td></tr>{{/each}}</tbody></table></div></div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="pane-pending" role="tabpanel">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-info text-white"><h5 class="mb-0">Có {{pendingAds.length}} tin mới chờ duyệt</h5></div>
+                        <div class="card-body p-0"><div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead class="table-light"><tr><th>Mã SP</th><th>Người đăng</th><th>Tên sản phẩm</th><th>Thao tác nhanh</th></tr></thead>
+                        <tbody>{{#each pendingAds}}<tr><td class="fw-bold text-primary">#SP-{{this.listing_id}}</td><td>{{this.full_name}}</td><td class="fw-bold">{{this.title}}</td><td><button class="btn btn-success btn-sm btn-approve-ad" data-id="{{this.listing_id}}">✅ Duyệt</button> <button class="btn btn-danger btn-sm btn-delete-ad ms-1" data-id="{{this.listing_id}}">❌ Từ chối</button></td></tr>{{/each}}</tbody></table></div></div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="pane-vip" role="tabpanel">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center"><h5 class="mb-0">Có {{pendingVip.length}} yêu cầu VIP</h5><input type="text" id="searchVipInput" class="form-control form-control-sm w-50" placeholder="🔍 Lọc nhanh..."></div>
+                        <div class="card-body p-0"><div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead class="table-light"><tr><th>Mã SP</th><th>Hình ảnh</th><th>Người yêu cầu</th><th>Tên sản phẩm</th><th>Thao tác</th></tr></thead>
+                        <tbody>{{#each pendingVip}}<tr class="vip-row"><td class="fw-bold text-primary">#SP-{{this.listing_id}}</td><td><img src="{{this.img}}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;"></td><td>{{this.full_name}}</td><td class="fw-bold">{{this.title}}</td><td><button class="btn btn-success btn-sm btn-approve-vip" data-id="{{this.listing_id}}">✅ Duyệt</button> <button class="btn btn-danger btn-sm btn-reject-vip ms-1" data-id="{{this.listing_id}}">❌ Từ chối</button></td></tr>{{/each}}</tbody></table></div></div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="pane-reports" role="tabpanel">
+                    <div class="card shadow-sm border-0 border-danger">
+                        <div class="card-header bg-danger text-white"><h5 class="mb-0">🚨 Có {{pendingReports.length}} báo cáo cần xử lý</h5></div>
+                        <div class="card-body p-0"><div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead class="table-light"><tr><th>Mã SP</th><th>Hình ảnh</th><th>Người tố cáo</th><th>Lý do vi phạm</th><th>Phán quyết</th></tr></thead>
+                        <tbody>{{#each pendingReports}}<tr><td class="fw-bold text-primary">#SP-{{this.listing_id}}</td><td><img src="{{this.img}}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;"></td><td class="fw-bold">{{this.reporter_name}}</td><td><span class="badge bg-light text-dark border p-2" style="white-space: normal; text-align: left;">{{this.reason}}</span></td><td><button class="btn btn-danger btn-sm btn-resolve-report fw-bold" data-rid="{{this.report_id}}" data-lid="{{this.listing_id}}" data-action="delete">🗑️ Xóa bài</button> <button class="btn btn-secondary btn-sm btn-resolve-report mt-1" data-rid="{{this.report_id}}" data-lid="{{this.listing_id}}" data-action="ignore">Bỏ qua</button></td></tr>{{/each}}</tbody></table></div></div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="pane-kyc" role="tabpanel">
+                    <div class="card shadow-sm border-0 border-dark">
+                        <div class="card-header bg-dark text-white"><h5 class="mb-0">🛡️ Có {{pendingKycs.length}} tài khoản chờ xác minh CCCD</h5></div>
+                        <div class="card-body p-0"><div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead class="table-light"><tr><th>ID User</th><th>Họ và Tên</th><th>Số điện thoại</th><th>Số CCCD / CMND</th><th>Địa chỉ thường trú</th><th>Thao tác</th></tr></thead>
+                        <tbody>{{#each pendingKycs}}<tr><td class="fw-bold text-secondary">#{{this.user_id}}</td><td class="fw-bold">{{this.full_name}}</td><td>{{this.phone_number}}</td><td class="fw-bold text-primary">{{this.cccd}}</td><td>{{this.address}}</td><td><button class="btn btn-success btn-sm btn-approve-kyc" data-id="{{this.user_id}}">✅ Duyệt</button> <button class="btn btn-danger btn-sm btn-reject-kyc mt-1" data-id="{{this.user_id}}">❌ Bác bỏ</button></td></tr>{{/each}}</tbody></table></div></div>
+                    </div>
+                </div>
+
             </div>
-            <div class="col-md-2">
-                <button type="submit" class="btn btn-dark w-100 fw-bold">LỌC TIN</button>
-            </div>
-        </form>
-    </div>
-</div>
-    <div class="card shadow-sm border-0">
-        <div class="card-header bg-dark text-white fw-bold">Tất cả sản phẩm trên sàn</div>
-        <div class="card-body p-0">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>Hình ảnh</th>
-                        <th>Tên sản phẩm</th>
-                        <th>Loại tin</th>
-                        <th>Giá</th>
-                        <th>Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {{#each allListings}}
-                    <tr>
-                        <td><img src="{{this.img}}" width="50" class="rounded shadow-sm"></td>
-                        <td><strong>{{this.title}}</strong></td>
-                        <td>
-                            {{#if this.is_vip}}
-                                <span class="badge bg-warning text-dark animate__animated animate__flash animate__infinite animate__slow">
-                                    <i class="fas fa-crown me-1"></i> VIP
-                                </span>
-                            {{else}}
-                                <span class="badge bg-light text-muted border">Thường</span>
-                            {{/if}}
-                        </td>
-                        <td class="text-danger fw-bold">{{this.price}} đ</td>
-                        <td>
-                            <button class="btn btn-outline-danger btn-sm" onclick="deleteProduct({{this.listing_id}})">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                    {{/each}}
-                </tbody>
-            </table>
         </div>
     </div>
 </div>
-{{#if pendingAds.length}}
-<div class="card border-info mb-4 shadow-sm animate__animated animate__fadeIn">
-    <div class="card-header bg-info text-white fw-bold">
-        <i class="fas fa-clipboard-check me-2"></i> CÓ {{pendingAds.length}} TIN MỚI CHỜ DUYỆT NỘI DUNG
-    </div>
-    <div class="card-body p-0">
-        <table class="table table-hover mb-0">
-            <tbody>
-                {{#each pendingAds}}
-                <tr>
-                    <td>#{{this.listing_id}}</td>
-                    <td><strong>{{this.full_name}}</strong></td>
-                    <td>{{this.title}}</td>
-                    <td class="text-end">
-                        <button class="btn btn-outline-primary btn-sm" onclick="approveAd({{this.listing_id}})">
-                            Duyệt tin
-                        </button>
-                    </td>
-                </tr>
-                {{/each}}
-            </tbody>
-        </table>
-    </div>
-</div>
-{{/if}}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-// Hàm duyệt tin thường
-async function approveAd(id) {
-    const res = await fetch('/admin/approve-ad', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ listing_id: id })
-    });
-    const data = await res.json();
-    if(data.success) {
-        Swal.fire('Thành công', 'Tin đã được hiển thị trên trang chủ!', 'success').then(() => location.reload());
-    }
-}
-</script>
-<script>
-// Hàm xử lý duyệt VIP
-// Thay thế hàm approveVip cũ
-async function approveVip(id) {
-    // Sử dụng SweetAlert2 để tạo popup xác nhận
-    const result = await Swal.fire({
-        title: 'Xác nhận duyệt VIP?',
-        text: `Bạn đã kiểm tra tài khoản và nhận đủ 2.000đ cho tin #${id} chưa?`,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#198754', // Màu xanh lá thành công
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Đã nhận tiền, Duyệt ngay!',
-        cancelButtonText: 'Chưa nhận được',
-        reverseButtons: true
-    });
+document.addEventListener('DOMContentLoaded', () => {
+    // Tìm kiếm
+    const searchProductInput = document.getElementById('searchProductInput'); if(searchProductInput) searchProductInput.addEventListener('keyup', function() { let f = this.value.toLowerCase(); document.querySelectorAll('.product-row').forEach(row => { row.style.display = row.innerText.toLowerCase().includes(f) ? '' : 'none'; }); });
+    const searchVipInput = document.getElementById('searchVipInput'); if(searchVipInput) searchVipInput.addEventListener('keyup', function() { let f = this.value.toLowerCase(); document.querySelectorAll('.vip-row').forEach(row => { row.style.display = row.innerText.toLowerCase().includes(f) ? '' : 'none'; }); });
 
-    if (result.isConfirmed) {
-        // Hiện hiệu ứng đang xử lý cho chuyên nghiệp
+    const ajaxPost = async (url, dataObj) => { await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dataObj) }); location.reload(); };
+    
+    // HÀM HIỂN THỊ POPUP NHẬP LÝ DO DÙNG CHUNG CHO CẢ 4 TABS
+    const promptReasonAndPost = (title, placeholder, url, dataObj) => {
         Swal.fire({
-            title: 'Đang kích hoạt...',
-            didOpen: () => { Swal.showLoading(); }
-        });
-
-        try {
-            const res = await fetch('/admin/approve-vip', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ listing_id: id })
-            });
-            const data = await res.json();
-
-            if (data.success) {
-                await Swal.fire({
-                    title: 'Thành công!',
-                    text: 'Sản phẩm đã chính thức lên VIP lấp lánh.',
-                    icon: 'success',
-                    timer: 2000,
-                    showConfirmButton: false
-                });
-                location.reload();
-            } else {
-                Swal.fire('Lỗi', 'Không thể duyệt lúc này, thử lại sau nhé!', 'error');
+            title: title,
+            input: 'textarea',
+            inputLabel: 'Nhập lý do (Sẽ báo qua chuông thông báo cho user):',
+            inputPlaceholder: placeholder,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Xác nhận',
+            cancelButtonText: 'Hủy',
+            confirmButtonColor: '#d33'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                dataObj.reason = result.value.trim() || 'Vi phạm chính sách hệ thống.';
+                ajaxPost(url, dataObj);
             }
-        } catch (err) {
-            Swal.fire('Lỗi kết nối', 'Server có vẻ đang bận rồi Thế Anh ơi!', 'error');
-        }
-    }
-}
-// Hàm xử lý xóa tin đăng
-async function deleteProduct(id) {
-    if(confirm('Bạn có chắc muốn xóa vĩnh viễn tin đăng này không?')) {
-        const res = await fetch('/admin/delete-product', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ listing_id: id })
         });
-        const data = await res.json();
-        if(data.success) location.reload();
-    }
-}
+    };
+
+    // 1. Tab "Quản lý sản phẩm" & "Duyệt tin đăng" -> Nút Xóa/Từ chối
+    document.querySelectorAll('.btn-delete-ad').forEach(btn => btn.addEventListener('click', (e) => {
+        promptReasonAndPost('Xóa/Từ chối tin này?', 'VD: Ảnh mờ, sai chuyên mục, hàng cấm...', '/delete-listing', {listing_id: e.currentTarget.getAttribute('data-id')});
+    }));
+
+    // 2. Tab "Duyệt gói VIP" -> Nút Từ chối
+    document.querySelectorAll('.btn-reject-vip').forEach(btn => btn.addEventListener('click', (e) => {
+        promptReasonAndPost('Từ chối gói VIP?', 'VD: Chưa nhận được thanh toán, hình ảnh không đạt chuẩn...', '/admin/reject-vip', {listing_id: e.currentTarget.getAttribute('data-id')});
+    }));
+
+    // 3. Tab "Quản lý báo cáo" -> Nút Xóa bài
+    document.querySelectorAll('.btn-resolve-report').forEach(btn => btn.addEventListener('click', (e) => {
+        const rid = e.currentTarget.getAttribute('data-rid'); const lid = e.currentTarget.getAttribute('data-lid'); const action = e.currentTarget.getAttribute('data-action');
+        if (action === 'delete') {
+            promptReasonAndPost('Xóa bài vi phạm?', 'VD: Đã xác minh lừa đảo, hàng cấm bán...', '/admin/resolve-report', {report_id: rid, listing_id: lid, action: action});
+        } else {
+            Swal.fire({title: 'Bỏ qua báo cáo?', icon: 'info', showCancelButton: true, confirmButtonText: 'Đồng ý'}).then(r => { if (r.isConfirmed) ajaxPost('/admin/resolve-report', {report_id: rid, listing_id: lid, action: action}); });
+        }
+    }));
+
+    // 4. Tab "Duyệt danh tính (KYC)" -> Nút Bác bỏ
+    document.querySelectorAll('.btn-reject-kyc').forEach(btn => btn.addEventListener('click', (e) => {
+        promptReasonAndPost('Bác bỏ CCCD?', 'VD: Ảnh chụp mờ, sai thông tin...', '/admin/reject-kyc', {user_id: e.currentTarget.getAttribute('data-id')});
+    }));
+
+    // CÁC NÚT DUYỆT (Giữ nguyên - Bấm phát ăn luôn không cần lý do)
+    document.querySelectorAll('.btn-approve-ad').forEach(btn => btn.addEventListener('click', (e) => ajaxPost('/admin/approve-ad', {listing_id: e.currentTarget.getAttribute('data-id')})));
+    document.querySelectorAll('.btn-approve-vip').forEach(btn => btn.addEventListener('click', (e) => ajaxPost('/admin/approve-vip', {listing_id: e.currentTarget.getAttribute('data-id')})));
+    document.querySelectorAll('.btn-approve-kyc').forEach(btn => btn.addEventListener('click', (e) => ajaxPost('/admin/approve-kyc', {user_id: e.currentTarget.getAttribute('data-id')})));
+});
 </script>

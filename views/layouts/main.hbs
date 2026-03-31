@@ -3,85 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SHM - Chợ Sinh Viên</title>
+    <title>SHM - Marketplace</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        body { background-color: #f8f9fa; font-family: 'Segoe UI', sans-serif; }
-        .navbar-brand { font-weight: 800; font-size: 1.5rem; }
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .navbar { background: #0d6efd !important; padding: 0.8rem 0; }
+        .search-group { background: #fff; border-radius: 8px; overflow: hidden; width: 100%; }
+        .search-group select { border: none; background: #f8f9fa; border-right: 1px solid #ddd; max-width: 130px; font-size: 0.9rem; }
+        .search-group input { border: none; }
+        .search-group input:focus { box-shadow: none; }
+        .badge-noti { font-size: 0.65rem; position: absolute; top: -5px; right: -5px; }
+        .avatar-circle { width: 32px; height: 32px; background: #fff; color: #0d6efd; border-radius: 50%; font-weight: bold; display: flex; align-items: center; justify-content: center; border: 2px solid #fff; text-transform: uppercase; }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top py-3 shadow-sm">
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top shadow">
         <div class="container">
-            <a class="navbar-brand text-warning" href="/"><i class="fas fa-store me-2"></i>SHM</a>
-            
-            <form action="/" method="GET" class="d-flex mx-auto w-50 shadow-sm rounded-pill bg-white overflow-hidden my-2 my-lg-0">
-                <select name="category" class="form-select border-0 bg-transparent ps-3 fw-medium text-secondary" style="width: 140px; box-shadow: none;">
-                    <option value="">Tất cả</option>
-                    {{#each globalCategories}}
-                        <option value="{{this.category_id}}" {{#if (eq this.category_id ../selectedCategory)}}selected{{/if}}>{{this.category_name}}</option>
-                    {{/each}}
-                </select>
-                <div class="vr my-2 bg-secondary opacity-25"></div>
-                <input class="form-control border-0 bg-transparent px-3" type="search" name="keyword" value="{{keyword}}" placeholder="Bạn tìm gì hôm nay?" style="box-shadow: none;">
-                <button class="btn btn-warning rounded-0 px-4 fw-bold" type="submit"><i class="fas fa-search"></i></button>
+            <a class="navbar-brand fw-bold fs-3 d-flex align-items-center" href="/">
+                <i class="fas fa-shopping-basket text-warning me-2"></i>SHM
+            </a>
+
+            <form class="d-flex flex-grow-1 mx-lg-5" action="/" method="GET">
+                <div class="input-group search-group shadow-sm">
+                    <select name="category" class="form-select text-muted d-none d-md-block">
+                        <option value="">Tất cả</option>
+                        {{#each globalCategories}}
+                            <option value="{{this.category_id}}" {{#if (eq ../selectedCategory this.category_id)}}selected{{/if}}>{{this.category_name}}</option>
+                        {{/each}}
+                    </select>
+                    <input class="form-control py-2" type="search" name="keyword" placeholder="Bạn tìm gì hôm nay?" value="{{keyword}}">
+                    <button class="btn btn-warning px-4" type="submit"><i class="fas fa-search"></i></button>
+                </div>
             </form>
 
-            <ul class="navbar-nav ms-auto align-items-center">
-                <li class="nav-item position-relative me-3">
-                    <a class="nav-link text-white fs-5" href="/cart"><i class="fas fa-shopping-cart"></i>
-                        <span id="cart-badge" class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle shadow-sm">{{cartItemCount}}</span>
-                    </a>
-                </li>
-
+            <div class="d-flex align-items-center">
                 {{#if user}}
-                    <li class="nav-item ms-2">
-                        <a class="btn btn-warning fw-bold rounded-pill px-4 shadow-sm" href="/post-ad">Đăng tin</a>
-                    </li>
-                    <li class="nav-item dropdown ms-3">
-                        <a class="nav-link dropdown-toggle text-white fw-bold d-flex align-items-center" href="#" data-bs-toggle="dropdown">
-                            <img src="https://ui-avatars.com/api/?name={{user.full_name}}&background=random" class="rounded-circle me-2 border border-2 border-white" width="35" height="35">
-                            {{user.full_name}}
+                    <a href="/cart" class="text-white me-3 position-relative"><i class="fas fa-heart fs-5"></i>
+                        {{#if cartItemCount}}<span class="badge rounded-pill bg-danger badge-noti">{{cartItemCount}}</span>{{/if}}
+                    </a>
+                    <a href="/messages" class="text-white me-3 position-relative"><i class="fas fa-comment-dots fs-5"></i></a>
+                    <a href="/notifications" class="text-white me-3 position-relative"><i class="fas fa-bell fs-5"></i>
+                        {{#if notiItemCount}}<span class="badge rounded-pill bg-danger badge-noti">{{notiItemCount}}</span>{{/if}}
+                    </a>
+                    <a href="/post-ad" class="btn btn-warning fw-bold btn-sm rounded-pill px-3 me-3 text-dark shadow-sm">Đăng tin</a>
+                    
+                    <div class="dropdown">
+                        <a class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                            <div class="avatar-circle me-2">{{substring user.full_name 0 1}}</div>
+                            <span class="d-none d-md-inline fw-bold small text-uppercase">{{user.full_name}}</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end border-0 shadow mt-2">
-                            {{#if isAdmin}}<li><a class="dropdown-item text-danger fw-bold" href="/admin">Quản trị viên</a></li><li><hr class="dropdown-divider"></li>{{/if}}
-                            <li><a class="dropdown-item" href="/my-listings">Tin của tôi</a></li>
-                            <li><a class="dropdown-item text-danger fw-bold" href="/logout">Đăng xuất</a></li>
+                            <li><a class="dropdown-item py-2" href="/profile"><i class="fas fa-user-circle me-2 text-primary"></i>Hồ sơ cá nhân</a></li>
+                            <li><a class="dropdown-item py-2" href="/my-listings"><i class="fas fa-box me-2 text-success"></i>Tin của tôi</a></li>
+                            {{#if isAdmin}}
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item py-2 fw-bold text-danger" href="/admin"><i class="fas fa-user-shield me-2"></i>QUẢN TRỊ VIÊN</a></li>
+                            {{/if}}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item py-2 text-muted" href="/logout"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
                         </ul>
-                    </li>
+                    </div>
                 {{else}}
-                    <li class="nav-item"><a class="btn btn-outline-light rounded-pill px-4 me-2 fw-medium" href="/login">Đăng nhập</a></li>
-                    <li class="nav-item"><a class="btn btn-warning rounded-pill px-4 fw-bold shadow-sm" href="/register">Đăng ký</a></li>
+                    <a href="/login" class="btn btn-outline-light btn-sm me-2 fw-bold px-3 rounded-pill">Đăng nhập</a>
+                    <a href="/register" class="btn btn-warning btn-sm fw-bold px-3 rounded-pill text-dark shadow-sm">Đăng ký</a>
                 {{/if}}
-            </ul>
+            </div>
         </div>
     </nav>
-
-    <main class="container mt-4">{{{body}}}</main>
-
-    <div class="toast-container position-fixed bottom-0 end-0 p-3">
-      <div id="liveToast" class="toast bg-success text-white border-0 shadow" role="alert"><div class="toast-body"><i class="fas fa-check-circle me-2"></i>Đã thêm sản phẩm vào giỏ!</div></div>
-    </div>
-
+    <div class="container py-4">{{{body}}}</div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // XỬ LÝ GIỎ HÀNG AJAX
-        document.querySelectorAll('form[action="/cart/add"]').forEach(f => {
-            f.onsubmit = async (e) => {
-                e.preventDefault();
-                const r = await fetch('/cart/add', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(Object.fromEntries(new FormData(f))) });
-                const d = await r.json();
-                if (d.success) {
-                    document.getElementById('cart-badge').innerText = d.cartCount;
-                    new bootstrap.Toast(document.getElementById('liveToast')).show();
-                } else {
-                    Swal.fire({ title: 'Opps!', text: d.message, icon: 'info', showCancelButton: true, confirmButtonText: 'Đăng nhập', confirmButtonColor: '#0d6efd' })
-                    .then(res => { if(res.isConfirmed) window.location.href = d.redirect; });
-                }
-            };
-        });
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 </html>

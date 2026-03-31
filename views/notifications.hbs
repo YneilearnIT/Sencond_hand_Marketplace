@@ -1,0 +1,40 @@
+<div class="container mt-4 mb-5">
+    <h3 class="fw-bold mb-4">
+        <i class="fas fa-bell text-warning me-2"></i>Thông báo của bạn
+    </h3>
+
+    <div class="card border-0 shadow-sm" style="border-radius: 12px; overflow: hidden;">
+        <div class="card-body p-0">
+            {{#if notifications.length}}
+                <div class="list-group list-group-flush">
+                    {{#each notifications}}
+                        <div class="list-group-item p-4 border-bottom {{#unless this.is_read}}bg-light{{/unless}}" style="transition: 0.3s;">
+                            <div class="d-flex w-100 justify-content-between align-items-center">
+                                <h6 class="mb-1 {{#unless this.is_read}}fw-bold text-dark{{else}}text-muted{{/unless}}" style="line-height: 1.5;">
+                                    {{#unless this.is_read}}
+                                        <span class="badge bg-danger rounded-circle p-1 me-2" style="width: 10px; height: 10px; display: inline-block;"></span>
+                                    {{/unless}}
+                                    {{{this.message}}}
+                                </h6>
+                                <small class="text-muted ms-3" style="min-width: 80px; text-align: right;">
+                                    <i class="far fa-clock me-1"></i>{{this.created_at}}
+                                </small>
+                            </div>
+                        </div>
+                    {{/each}}
+                </div>
+            {{else}}
+                <div class="text-center py-5">
+                    <i class="far fa-bell-slash fa-4x text-muted mb-3" style="opacity: 0.3;"></i>
+                    <h5 class="text-muted fw-bold">Bạn chưa có thông báo nào</h5>
+                    <p class="text-muted small">Những thông báo về duyệt tin, mua VIP hoặc KYC sẽ xuất hiện ở đây.</p>
+                    <a href="/" class="btn btn-primary mt-2 rounded-pill px-4">Quay lại trang chủ</a>
+                </div>
+            {{/if}}
+        </div>
+    </div>
+</div>
+
+<style>
+    .list-group-item:hover { background-color: #f8f9fa !important; }
+</style>

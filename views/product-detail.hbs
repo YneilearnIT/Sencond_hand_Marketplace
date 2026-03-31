@@ -1,139 +1,193 @@
-<div class="container mt-5">
-    <nav aria-label="breadcrumb">
+<div class="container mt-4 mb-5">
+    <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/" class="text-decoration-none">Trang chủ</a></li>
             <li class="breadcrumb-item active" aria-current="page">Chi tiết sản phẩm</li>
         </ol>
     </nav>
 
-    <div class="row bg-white p-4 rounded-4 shadow-sm border mt-3 animate__animated animate__fadeIn">
-        <div class="col-md-5 text-center mb-4 mb-md-0 position-relative">
-            {{#if product.is_vip}}
-            <div class="position-absolute top-0 start-0 m-3" style="z-index: 10;">
-                <i class="fas fa-crown fa-3x text-warning animate__animated animate__swing animate__infinite"></i>
-            </div>
-            {{/if}}
-            
-            <img src="{{product.img}}" alt="{{product.title}}" 
-                 class="img-fluid rounded-3 border shadow-sm w-100" 
-                 style="max-height: 450px; object-fit: cover;" 
-                 onerror="this.onerror=null; this.src='/images/default.jpg';">
-        </div>
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+            <div class="row">
+                <div class="col-md-6 mb-4 mb-md-0 text-center">
+                    <div class="bg-light rounded d-flex align-items-center justify-content-center p-2" style="height: 400px;">
+                        <img src="{{product.img}}" class="img-fluid rounded" style="max-height: 100%; object-fit: contain;" alt="{{product.title}}">
+                    </div>
+                </div>
 
-        <div class="col-md-7 ps-md-5">
-            <div class="d-flex align-items-center mb-2">
-                <h2 class="fw-bold text-dark mb-0">{{product.title}}</h2>
-                {{#if product.is_vip}}
-                    <span class="badge bg-warning text-dark ms-2 animate__animated animate__flash animate__infinite">VIP</span>
-                {{/if}}
-            </div>
-            
-            <h3 class="text-danger fw-bold mb-4 fs-2">{{product.price}} đ</h3>
-            
-            <div class="card bg-light border-0 rounded-3 mb-4">
-                <div class="card-body">
-                    <ul class="list-unstyled mb-0">
-                        <li class="mb-3 d-flex align-items-center">
-                            <div class="icon-box bg-white rounded-circle p-2 me-3 shadow-sm">
-                                <i class="fas fa-user-tie text-primary"></i>
+                <div class="col-md-6 d-flex flex-column">
+                    <h2 class="fw-bold mb-2">{{product.title}}</h2>
+                    <h3 class="text-danger fw-bold mb-4">{{product.price}} đ</h3>
+
+                    <div class="bg-light p-3 rounded mb-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                <i class="fas fa-user"></i>
                             </div>
                             <div>
-                                <small class="text-muted d-block">Người bán</small>
-                                <strong>{{product.seller_name}}</strong>
+                                <p class="mb-0 text-muted" style="font-size: 0.85rem;">Người bán</p>
+                                <h6 class="mb-0 fw-bold">{{product.seller_name}}</h6>
                             </div>
-                        </li>
-                        <li class="mb-3 d-flex align-items-center">
-                            <div class="icon-box bg-white rounded-circle p-2 me-3 shadow-sm">
-                                <i class="fas fa-map-marker-alt text-danger"></i>
-                            </div>
+                        </div>
+                        
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="text-danger fs-4 me-3 text-center" style="width: 40px;"><i class="fas fa-map-marker-alt"></i></div>
                             <div>
-                                <small class="text-muted d-block">Khu vực</small>
-                                <strong>{{product.location_gps}}</strong>
+                                <p class="mb-0 text-muted" style="font-size: 0.85rem;">Khu vực</p>
+                                <h6 class="mb-0 fw-bold">{{product.location_gps}}</h6>
                             </div>
-                        </li>
-                        <li class="d-flex align-items-center">
-                            <div class="icon-box bg-white rounded-circle p-2 me-3 shadow-sm">
-                                <i class="fas fa-shield-alt text-success"></i>
-                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center">
+                            <div class="text-success fs-4 me-3 text-center" style="width: 40px;"><i class="fas fa-box-open"></i></div>
                             <div>
-                                <small class="text-muted d-block">Tình trạng</small>
-                                <strong>Mới {{product.condition_percentage}}%</strong>
+                                <p class="mb-0 text-muted" style="font-size: 0.85rem;">Tình trạng</p>
+                                <h6 class="mb-0 fw-bold">Mới {{product.condition_percentage}}%</h6>
                             </div>
-                        </li>
-                    </ul>
+                        </div>
+                    </div>
+
+                    <div class="mt-auto">
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <button class="btn btn-outline-danger w-100 fw-bold py-2 btn-add-cart" data-id="{{product.listing_id}}">
+                                    <i class="far fa-heart me-1"></i> Quan tâm
+                                </button>
+                            </div>
+                            <div class="col-6">
+                                <button class="btn btn-success w-100 fw-bold py-2 btn-chat" data-lid="{{product.listing_id}}" data-sid="{{product.seller_id}}">
+                                    <i class="fas fa-comment-dots me-1"></i> GỌI NGƯỜI BÁN
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mt-3">
+                            {{#if user}}
+                                <button class="btn btn-outline-danger w-100 fw-bold" id="btn-report-product" data-id="{{product.listing_id}}">
+                                    🚩 Báo cáo sản phẩm vi phạm
+                                </button>
+                            {{else}}
+                                <button class="btn btn-outline-secondary w-100 fw-bold" onclick="Swal.fire('Oop!', 'Vui lòng đăng nhập để báo cáo sản phẩm này nhé!', 'info').then(() => window.location.href='/login')">
+                                    🚩 Đăng nhập để báo cáo
+                                </button>
+                            {{/if}}
+                        </div>
+                    </div>
+
                 </div>
             </div>
+        </div>
+    </div>
 
-            <div class="mb-4">
-                <h5 class="fw-bold mb-3"><i class="fas fa-align-left me-2"></i>Mô tả chi tiết:</h5>
-                <div class="p-3 rounded-3 border bg-white" style="white-space: pre-wrap; line-height: 1.6; color: #444;">{{product.description}}</div>
-            </div>
-
-            <div class="d-flex gap-3 mt-5">
-                <button onclick="addToCart('{{product.listing_id}}')" class="btn btn-warning btn-lg flex-grow-1 fw-bold py-3 shadow-sm border-0 rounded-pill">
-                    <i class="fas fa-cart-plus me-2"></i> THÊM VÀO GIỎ
-                </button>
-                
-                <button class="btn btn-success btn-lg flex-grow-1 fw-bold py-3 shadow-sm border-0 rounded-pill" 
-                    onclick="contactSeller('{{product.full_name}}', '{{product.phone_number}}')">
-                    <i class="fas fa-phone-alt me-2"></i> GỌI NGƯỜI BÁN
-                </button>
-            </div>
+    <div class="card shadow-sm border-0 mt-4">
+        <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+            <h5 class="fw-bold"><i class="fas fa-info-circle me-2 text-primary"></i>Mô tả chi tiết</h5>
+        </div>
+        <div class="card-body">
+            <div class="p-3 bg-light rounded text-secondary" style="white-space: pre-wrap; font-size: 0.95rem; line-height: 1.6;">{{product.description}}</div>
         </div>
     </div>
 </div>
 
-<style>
-    .icon-box { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
-    .btn-warning { background-color: #ffc107; color: #000; transition: all 0.3s; }
-    .btn-warning:hover { background-color: #e0a800; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255, 193, 7, 0.4); }
-    .btn-success { transition: all 0.3s; }
-    .btn-success:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(25, 135, 84, 0.4); }
-</style>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-// Hàm xử lý Thêm vào giỏ hàng qua AJAX
-async function addToCart(id) {
-    const res = await fetch('/cart/add', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ listing_id: id })
-    });
-    const data = await res.json();
+document.addEventListener('DOMContentLoaded', () => {
     
-    if (data.success) {
-        Swal.fire('Thành công', 'Đã thêm vào giỏ hàng!', 'success').then(() => location.reload());
-    } else {
-        // NẾU CHƯA ĐĂNG NHẬP: Hiện thông báo rồi mới chuyển hướng
-        Swal.fire({
-            title: 'Yêu cầu đăng nhập',
-            text: data.message,
-            icon: 'warning',
-            confirmButtonText: 'Đến trang Đăng nhập',
-            confirmButtonColor: '#ffc107'
-        }).then((result) => {
-            if (result.isConfirmed && data.redirect) {
-                window.location.href = data.redirect; // Chuyển hướng sang /login
+    // 1. CHỨC NĂNG LƯU QUAN TÂM
+    document.querySelectorAll('.btn-add-cart').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            const id = e.currentTarget.getAttribute('data-id');
+            try {
+                const res = await fetch('/cart/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ listing_id: id })
+                });
+                const data = await res.json();
+                
+                if (data.success) {
+                    Swal.fire({ 
+                        icon: 'success', 
+                        title: 'Đã lưu!', 
+                        text: 'Sản phẩm đã được thêm vào mục Quan tâm', 
+                        timer: 1500, 
+                        showConfirmButton: false 
+                    }).then(() => location.reload());
+                } else if (data.redirect) {
+                    window.location.href = data.redirect;
+                } else {
+                    Swal.fire('Lỗi', data.message || 'Không thể thao tác', 'error');
+                }
+            } catch (err) {
+                Swal.fire('Lỗi', 'Mất kết nối với máy chủ!', 'error');
             }
         });
-    }
-}
-
-// Hàm hiện thông tin liên hệ người bán
-function contactSeller(name, phone) {
-    Swal.fire({
-        title: 'Thông tin người bán',
-        html: `
-            <div class="text-start p-3">
-                <p><strong>Họ tên:</strong> ${name}</p>
-                <p><strong>Số điện thoại:</strong> <span class="text-danger fw-bold fs-4">${phone}</span></p>
-                <hr>
-                <p class="small text-muted italic">* Vui lòng nhắc đến SHM khi gọi điện để được ưu đãi.</p>
-            </div>
-        `,
-        icon: 'info',
-        confirmButtonText: 'Đã hiểu',
-        confirmButtonColor: '#198754'
     });
-}
+
+    // 2. CHỨC NĂNG CHAT VỚI NGƯỜI BÁN
+    document.querySelectorAll('.btn-chat').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            const lid = e.currentTarget.getAttribute('data-lid');
+            const sid = e.currentTarget.getAttribute('data-sid');
+            try {
+                const res = await fetch('/chat/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ listing_id: lid, seller_id: sid })
+                });
+                const data = await res.json();
+                
+                if (data.success) {
+                    window.location.href = data.redirect;
+                } else if (data.redirect) {
+                    window.location.href = data.redirect;
+                } else {
+                    Swal.fire('Lỗi', data.message || 'Không thể bắt đầu chat', 'error');
+                }
+            } catch (err) {
+                Swal.fire('Lỗi', 'Mất kết nối với máy chủ!', 'error');
+            }
+        });
+    });
+
+    // 3. CHỨC NĂNG BÁO CÁO SẢN PHẨM
+    const btnReport = document.getElementById('btn-report-product');
+    if(btnReport) {
+        btnReport.addEventListener('click', function() {
+            const listingId = this.getAttribute('data-id');
+            Swal.fire({
+                title: 'Báo cáo sản phẩm',
+                input: 'textarea',
+                inputLabel: 'Lý do (Hàng giả, lừa đảo, cấm bán...)',
+                inputPlaceholder: 'Nhập lý do chi tiết...',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                confirmButtonText: 'Gửi báo cáo',
+                cancelButtonText: 'Hủy'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    if(!result.value.trim()) return Swal.fire('Lỗi', 'Vui lòng nhập lý do!', 'error');
+                    
+                    try {
+                        const res = await fetch('/report-listing', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ listing_id: listingId, reason: result.value.trim() })
+                        });
+                        const data = await res.json();
+                        
+                        if(data.success) {
+                            Swal.fire('Thành công', 'Đã gửi báo cáo cho Admin xử lý.', 'success');
+                        } else {
+                            Swal.fire('Lỗi', data.message || 'Có lỗi xảy ra, vui lòng thử lại!', 'error');
+                        }
+                    } catch (err) {
+                        Swal.fire('Lỗi', 'Không thể kết nối đến Server', 'error');
+                    }
+                }
+            });
+        });
+    }
+});
 </script>

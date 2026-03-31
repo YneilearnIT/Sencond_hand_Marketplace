@@ -1,0 +1,177 @@
+<div class="container mt-4 mb-5">
+    <div class="row justify-content-center">
+        
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm border-0 text-center p-4 h-100">
+                <div class="mx-auto bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mb-3 shadow-sm" style="width: 90px; height: 90px; font-size: 2.5rem;">
+                    {{substring userProfile.full_name 0 1}}
+                </div>
+                
+                <h5 class="fw-bold mb-1 d-flex align-items-center justify-content-center text-dark">
+                    {{userProfile.full_name}}
+                    {{#if (eq userProfile.is_verified 1)}}
+                        <i class="fas fa-check-circle text-primary ms-2 fs-6" title="Tài khoản đã xác minh"></i>
+                    {{/if}}
+                </h5>
+                
+                <p class="text-muted mb-3" style="font-size: 0.95rem;">{{userProfile.email}}</p>
+                
+                <div class="mb-4">
+                    {{#if (eq userProfile.is_verified 1)}}
+                        <span class="badge bg-success text-white px-3 py-2 rounded-pill shadow-sm" style="font-size: 0.85rem; font-weight: 600;">
+                            <i class="fas fa-shield-alt me-1"></i> Đã xác minh
+                        </span>
+                    {{else if (eq userProfile.is_verified 2)}}
+                        <span class="badge bg-info text-dark px-3 py-2 rounded-pill shadow-sm" style="font-size: 0.85rem; font-weight: 600;">
+                            <i class="fas fa-hourglass-half me-1"></i> Đang chờ duyệt
+                        </span>
+                    {{else}}
+                        <span class="badge px-3 py-2 rounded-pill shadow-sm text-dark" style="background-color: #ffc107; font-size: 0.85rem; font-weight: 600;">
+                            <i class="fas fa-exclamation-triangle me-1"></i> Chưa xác minh
+                        </span>
+                    {{/if}}
+                </div>
+                
+                <hr class="mb-3 mt-0" style="border-top: 1px solid #e0e0e0; opacity: 1;">
+                
+                <div class="text-start ms-2">
+                    <p class="small text-muted mb-2 d-flex align-items-center">
+                        <i class="far fa-calendar-alt me-2" style="width: 16px; text-align: center;"></i> 
+                        Ngày tham gia: 01/01/2026
+                    </p>
+                    <p class="small text-muted mb-0 d-flex align-items-center">
+                        <i class="fas fa-user-tag me-2" style="width: 16px; text-align: center;"></i> 
+                        Vai trò: <span class="text-capitalize ms-1">{{userProfile.role}}</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0 text-start p-4">
+                <h5 class="fw-bold text-primary mb-3">
+                    <i class="fas fa-user-edit me-2"></i>Chỉnh sửa hồ sơ
+                </h5>
+                <div class="card-body p-0">
+                    <form action="/api/verify-kyc" method="POST" enctype="multipart/form-data">
+                        
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small">Họ và Tên</label>
+                                <input type="text" name="full_name" class="form-control" value="{{userProfile.full_name}}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small">Số điện thoại</label>
+                                <input type="tel" name="phone_number" class="form-control" value="{{userProfile.phone_number}}" required>
+                            </div>
+                        </div>
+
+                        {{#unless (eq userProfile.is_verified 1)}}
+                            <hr class="my-4">
+                            
+                            <h6 class="text-muted fw-bold mb-3">Xác minh danh tính (KYC)</h6>
+                            <p class="text-muted small mb-4">
+                                Để đảm bảo an toàn cho cộng đồng, bạn cần cung cấp thông tin cá nhân và ảnh chụp CCCD/CMND trước khi đăng bán.
+                            </p>
+
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <div class="upload-box border dashed rounded bg-light p-3 h-100 position-relative">
+                                        <input type="file" id="frontImage" name="frontImage" accept="image/*" class="d-none" required>
+                                        <label for="frontImage" class="d-flex flex-column align-items-center justify-content-center text-center text-secondary h-100 w-100 m-0" style="cursor: pointer;">
+                                            <div class="upload-preview" id="frontPreview"></div>
+                                            <i class="fas fa-camera fs-2 text-primary mb-2"></i>
+                                            <span class="small fw-bold">Tải lên mặt trước</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="upload-box border dashed rounded bg-light p-3 h-100 position-relative">
+                                        <input type="file" id="backImage" name="backImage" accept="image/*" class="d-none" required>
+                                        <label for="backImage" class="d-flex flex-column align-items-center justify-content-center text-center text-secondary h-100 w-100 m-0" style="cursor: pointer;">
+                                            <div class="upload-preview" id="backPreview"></div>
+                                            <i class="fas fa-camera fs-2 text-primary mb-2"></i>
+                                            <span class="small fw-bold">Tải lên mặt sau</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold small">Số CCCD / CMND</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-id-card text-primary me-2"></i></span>
+                                        <input type="text" name="cccd_number" class="form-control" placeholder="Nhập số..." value="{{userProfile.cccd}}" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold small">Địa chỉ thường trú</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-map-marker-alt text-primary me-2"></i></span>
+                                        <input type="text" name="address" class="form-control" placeholder="Nhập địa chỉ..." value="{{userProfile.address}}" required>
+                                    </div>
+                                </div>
+                            </div>
+                        {{/unless}}
+
+                        <div class="col-12 text-end mt-4">
+                            <button type="submit" class="btn btn-primary px-4 fw-bold">
+                                {{#if (eq userProfile.is_verified 1)}}
+                                    Lưu thay đổi hồ sơ
+                                {{else}}
+                                    Gửi xác minh & Lưu thay đổi
+                                {{/if}}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    .border.dashed { border-style: dashed !important; border-width: 2px !important; border-color: #dee2e6 !important; }
+    .border-primary.dashed { border-style: dashed !important; border-width: 2px !important; border-color: #0d6efd !important; }
+    .upload-box { position: relative; overflow: hidden; transition: all 0.3s ease; }
+    .upload-box:hover { border-color: #0d6efd !important; background-color: #f1f5f9 !important; }
+    .upload-box label:hover i, .upload-box label:hover span { color: #0d6efd !important; }
+    .upload-preview {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        background-size: cover; background-position: center; background-repeat: no-repeat;
+        border-radius: 6px; z-index: 1; display: none;
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Xử lý preview ảnh khi chọn file
+        function handleImagePreview(inputId, previewId) {
+            const input = document.getElementById(inputId);
+            const preview = document.getElementById(previewId);
+
+            if(!input || !preview) return;
+
+            input.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        preview.style.backgroundImage = `url(${e.target.result})`;
+                        preview.style.display = 'block';
+                    }
+                    reader.readAsDataURL(file);
+                } else {
+                    preview.style.backgroundImage = '';
+                    preview.style.display = 'none';
+                }
+            });
+        }
+
+        // Gắn sự kiện cho input ảnh mặt trước và sau
+        handleImagePreview('frontImage', 'frontPreview');
+        handleImagePreview('backImage', 'backPreview');
+    });
+</script>

@@ -1,0 +1,181 @@
+<div class="container mt-4 mb-5">
+    <div class="row bg-white rounded-4 shadow-sm border overflow-hidden" style="height: 80vh;">
+        
+        <div class="col-md-4 p-0 border-end bg-light d-flex flex-column" style="height: 100%;">
+            <div class="p-3 bg-white border-bottom shadow-sm z-1">
+                <h5 class="fw-bold mb-2 text-primary"><i class="fas fa-comment-dots me-2"></i>Quản lý tin nhắn</h5>
+                
+                <ul class="nav nav-pills nav-fill gap-2 mt-3" id="chat-tabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active rounded-pill py-1" id="tab-all" data-bs-toggle="pill" data-bs-target="#pane-all" type="button" role="tab">Tất cả</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link rounded-pill py-1" id="tab-selling" data-bs-toggle="pill" data-bs-target="#pane-selling" type="button" role="tab">Khách hỏi mua</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link rounded-pill py-1" id="tab-buying" data-bs-toggle="pill" data-bs-target="#pane-buying" type="button" role="tab">Mình đi mua</button>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="tab-content overflow-auto flex-grow-1" id="chat-tabs-content">
+                
+                <div class="tab-pane fade show active" id="pane-all" role="tabpanel">
+                    {{#if all_convs.length}}
+                        {{#each all_convs}}
+                            {{> conversation_item conv=this active_conv=../active_conv}}
+                        {{/each}}
+                    {{else}}
+                        <div class="p-4 text-center text-muted mt-5"><i class="fas fa-inbox fa-3x mb-3 text-light"></i><p>Trống.</p></div>
+                    {{/if}}
+                </div>
+
+                <div class="tab-pane fade" id="pane-selling" role="tabpanel">
+                    {{#if selling_convs.length}}
+                        {{#each selling_convs}}
+                            {{> conversation_item conv=this active_conv=../active_conv}}
+                        {{/each}}
+                    {{else}}
+                        <div class="p-4 text-center text-muted mt-5"><p>Chưa có ai hỏi mua sản phẩm của bạn.</p></div>
+                    {{/if}}
+                </div>
+
+                <div class="tab-pane fade" id="pane-buying" role="tabpanel">
+                    {{#if buying_convs.length}}
+                        {{#each buying_convs}}
+                            {{> conversation_item conv=this active_conv=../active_conv}}
+                        {{/each}}
+                    {{else}}
+                        <div class="p-4 text-center text-muted mt-5"><p>Bạn chưa liên hệ mua sản phẩm nào.</p></div>
+                    {{/if}}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8 p-0 d-flex flex-column position-relative" style="height: 100%;">
+            {{#if active_conv}}
+                <div class="p-3 bg-white border-bottom shadow-sm d-flex align-items-center justify-content-between z-1">
+                    <div class="d-flex align-items-center gap-3">
+                        <img id="chat-header-img" src="/images/default.jpg" class="rounded-circle object-fit-cover border" width="50" height="50">
+                        <div>
+                            <h5 class="fw-bold mb-0" id="chat-header-name">Đang tải...</h5>
+                            <small class="text-muted text-truncate d-block" style="max-width: 300px;" id="chat-header-product">...</small>
+                        </div>
+                    </div>
+                    <h5 class="text-danger fw-bold mb-0" id="chat-header-price">...</h5>
+                </div>
+                
+                <div class="p-3 overflow-auto flex-grow-1 bg-light" id="chat-messages" style="display: flex; flex-direction: column; gap: 10px;">
+                    <div class="text-center text-muted mt-3"><i class="fas fa-spinner fa-spin me-2"></i>Đang tải tin nhắn...</div>
+                </div>
+
+                <div class="p-3 bg-white border-top">
+                    <form id="chat-form" class="d-flex gap-2 align-items-center">
+                        <input type="text" id="chat-input" class="form-control rounded-pill bg-light border-0 px-4 py-2" placeholder="Nhập tin nhắn..." autocomplete="off" required>
+                        <button type="submit" class="btn btn-primary rounded-circle shadow-sm" style="width: 45px; height: 45px; flex-shrink: 0; transition: transform 0.2s;">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            {{else}}
+                <div class="d-flex flex-column justify-content-center align-items-center h-100 text-muted bg-light">
+                    <img src="https://cdn-icons-png.flaticon.com/512/1041/1041916.png" width="100" class="mb-3 opacity-50">
+                    <h4 class="fw-bold">Chọn một cuộc hội thoại</h4>
+                    <p>Khám phá tính năng chat thời gian thực.</p>
+                </div>
+            {{/if}}
+        </div>
+    </div>
+</div>
+
+{{#*inline "conversation_item"}}
+<a href="/messages?conv_id={{conv.conversation_id}}" class="text-decoration-none text-dark">
+    <div class="p-3 border-bottom conversation-item {{#if (eq conv.conversation_id active_conv)}}bg-white border-start border-4 border-primary shadow-sm{{else}}bg-transparent{{/if}} hover-bg-white transition-all d-flex gap-3 align-items-center">
+        <img src="{{conv.img}}" class="rounded-circle object-fit-cover shadow-sm" width="45" height="45" onerror="this.src='/images/default.jpg'">
+        <div class="flex-grow-1 overflow-hidden">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <strong class="text-truncate d-block w-75">{{conv.chat_partner_name}}</strong>
+                {{#if conv.unread_count}}
+                    <span class="badge bg-danger rounded-pill">{{conv.unread_count}}</span>
+                {{/if}}
+            </div>
+            <small class="text-muted d-block text-truncate">SP: {{conv.title}}</small>
+        </div>
+    </div>
+</a>
+{{/inline}}
+
+<style>
+    .hover-bg-white:hover { background-color: #fff !important; cursor: pointer; }
+    .msg-bubble { max-width: 70%; padding: 12px 18px; border-radius: 20px; font-size: 0.95rem; line-height: 1.5; word-wrap: break-word; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+    .msg-sent { background-color: #0d6efd; color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+    .msg-received { background-color: #ffffff; color: #333; align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid #eee; }
+    .transition-all { transition: all 0.2s ease-in-out; }
+    .nav-pills .nav-link { color: #555; font-weight: 500; font-size: 0.9rem; }
+    .nav-pills .nav-link.active { background-color: #e7f1ff; color: #0d6efd; font-weight: bold; }
+</style>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    const currentUserId = {{user.user_id}};
+    const activeConvId = {{#if active_conv}}{{active_conv}}{{else}}null{{/if}};
+    
+    if (activeConvId) {
+        const socket = io();
+        const chatMessages = document.getElementById('chat-messages');
+        const chatForm = document.getElementById('chat-form');
+        const chatInput = document.getElementById('chat-input');
+        let chatPartnerId = null;
+
+        const scrollToBottom = () => { chatMessages.scrollTop = chatMessages.scrollHeight; }
+
+        async function loadMessages() {
+            const res = await fetch(`/api/messages/${activeConvId}`);
+            const data = await res.json();
+            
+            chatMessages.innerHTML = ''; 
+            
+            if (data.success && data.messages.length > 0) {
+                data.messages.forEach(msg => appendMessage(msg.content, msg.sender_id === currentUserId ? 'sent' : 'received'));
+            } else {
+                chatMessages.innerHTML = '<div class="text-center text-muted mt-5"><img src="https://cdn-icons-png.flaticon.com/512/7362/7362145.png" width="60" class="mb-2 opacity-50"><br>Hãy gửi lời chào đầu tiên!</div>';
+            }
+            
+            if (data.partnerInfo) {
+                document.getElementById('chat-header-name').innerText = data.partnerInfo.name;
+                document.getElementById('chat-header-product').innerText = data.partnerInfo.title;
+                document.getElementById('chat-header-price').innerText = data.partnerInfo.price + ' đ';
+                document.getElementById('chat-header-img').src = data.partnerInfo.img;
+                chatPartnerId = data.partnerInfo.id;
+            }
+            scrollToBottom();
+        }
+
+        function appendMessage(content, type) {
+            if (chatMessages.innerHTML.includes("gửi lời chào đầu tiên")) chatMessages.innerHTML = '';
+            const div = document.createElement('div');
+            div.className = `msg-bubble msg-${type} animate__animated animate__fadeInUp animate__faster`;
+            div.innerText = content;
+            chatMessages.appendChild(div);
+            scrollToBottom();
+        }
+
+        chatForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const content = chatInput.value.trim();
+            if (!content || !chatPartnerId) return;
+
+            socket.emit('sendMessage', { conversation_id: activeConvId, receiver_id: chatPartnerId, content: content });
+            appendMessage(content, 'sent');
+            chatInput.value = '';
+        });
+
+        socket.on('receiveMessage', (msg) => {
+            if (msg.conversation_id == activeConvId && msg.sender_id !== currentUserId) {
+                appendMessage(msg.content, 'received');
+            }
+        });
+
+        loadMessages();
+    }
+</script>
